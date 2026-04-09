@@ -49,51 +49,33 @@ class TestMayaAvailable:
 
 
 class TestExecutorSetup:
-    def test_setup_executor_success(self):
-        """When DeferredExecutor is importable, executor is created."""
+    def test_setup_executor_is_noop(self):
+        """_setup_executor is a no-op placeholder in v0.12.10+ (DeferredExecutor removed)."""
         srv_mod = _import_server()
         server = srv_mod.MayaMcpServer(port=0, enable_main_thread_executor=False)
-        # Manually call _setup_executor
         server._setup_executor()
-        # If DeferredExecutor exists in dcc_mcp_core._core it is created;
-        # if not available, executor is None — either outcome is fine
-        # We just verify no exception leaks out
-        assert True
-
-    def test_setup_executor_graceful_failure(self):
-        """If DeferredExecutor cannot be imported, executor stays None."""
-        srv_mod = _import_server()
-        server = srv_mod.MayaMcpServer(port=0, enable_main_thread_executor=False)
-        # Force failure by patching the import
-        with patch.dict(sys.modules, {"dcc_mcp_core._core": None}):
-            server._setup_executor()
+        # executor stays None — DeferredExecutor no longer exists in dcc_mcp_core._core
         assert server._executor is None
 
     def test_server_with_executor_enabled_no_crash(self):
         """enable_main_thread_executor=True with mocked Maya should not crash."""
         srv_mod = _import_server()
-        # This exercises lines 92-95 (enable_executor branch)
         server = srv_mod.MayaMcpServer(port=0, enable_main_thread_executor=True)
         assert server is not None
 
 
 class TestPollCallback:
-    def test_setup_poll_callback_no_executor(self):
-        """If executor is None, _setup_poll_callback returns early."""
+    def test_setup_poll_callback_disabled(self):
+        """If enable_main_thread_executor=False, _setup_poll_callback is a no-op."""
         srv_mod = _import_server()
         server = srv_mod.MayaMcpServer(port=0, enable_main_thread_executor=False)
-        server._executor = None
         server._setup_poll_callback()  # should not raise
 
-    def test_setup_poll_callback_with_executor(self):
-        """With a mock executor and maya.utils available, callback installs."""
+    def test_setup_poll_callback_with_maya_available(self):
+        """With maya.utils available and executor enabled, callback installs."""
         srv_mod = _import_server()
-        server = srv_mod.MayaMcpServer(port=0, enable_main_thread_executor=False)
-        # Provide a mock executor
-        mock_executor = MagicMock()
-        server._executor = mock_executor
+        server = srv_mod.MayaMcpServer(port=0, enable_main_thread_executor=True)
         server._setup_poll_callback()
-        # maya.utils.executeDeferred should have been called
         import maya.utils
 
         assert maya.utils.executeDeferred.called
@@ -101,8 +83,7 @@ class TestPollCallback:
     def test_setup_poll_callback_exception_handled(self):
         """If maya.utils raises, the error is caught."""
         srv_mod = _import_server()
-        server = srv_mod.MayaMcpServer(port=0, enable_main_thread_executor=False)
-        server._executor = MagicMock()
+        server = srv_mod.MayaMcpServer(port=0, enable_main_thread_executor=True)
         import maya.utils
 
         maya.utils.executeDeferred.side_effect = RuntimeError("no event loop")
