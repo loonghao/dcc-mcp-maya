@@ -5,7 +5,7 @@ from __future__ import annotations
 
 # Import built-in modules
 import logging
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -374,9 +374,7 @@ def list_animation_curves(
             curve_type = cmds.objectType(curve)
             key_count = cmds.keyframe(curve, query=True, keyframeCount=True) or 0
             # Determine which attribute this curve drives
-            driven_plugs = cmds.listConnections(
-                curve, source=False, destination=True, plugs=True
-            ) or []
+            driven_plugs = cmds.listConnections(curve, source=False, destination=True, plugs=True) or []
             driven_attr = driven_plugs[0].split(".")[-1] if driven_plugs else ""
             curves.append(
                 {
@@ -398,9 +396,7 @@ def list_animation_curves(
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:
         logger.exception("list_animation_curves failed")
-        return error_result(
-            "Failed to list animation curves for '{}'".format(object_name), str(exc)
-        ).to_dict()
+        return error_result("Failed to list animation curves for '{}'".format(object_name), str(exc)).to_dict()
 
 
 def set_animation_curve_tangent(
@@ -485,9 +481,7 @@ def set_animation_curve_tangent(
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:
         logger.exception("set_animation_curve_tangent failed")
-        return error_result(
-            "Failed to set tangent on '{}.{}'".format(object_name, attribute), str(exc)
-        ).to_dict()
+        return error_result("Failed to set tangent on '{}.{}'".format(object_name, attribute), str(exc)).to_dict()
 
 
 def bake_constraints(
@@ -561,17 +555,13 @@ def bake_constraints(
             )
             for obj in targets:
                 for ctype in constraint_types:
-                    constraint_nodes = (
-                        cmds.listRelatives(obj, children=True, type=ctype) or []
-                    )
+                    constraint_nodes = cmds.listRelatives(obj, children=True, type=ctype) or []
                     for node in constraint_nodes:
                         cmds.delete(node)
                         removed_constraints.append(node)
 
         return success_result(
-            "Baked constraints on {} object(s) from frame {} to {}".format(
-                len(targets), start_frame, end_frame
-            ),
+            "Baked constraints on {} object(s) from frame {} to {}".format(len(targets), start_frame, end_frame),
             object_count=len(targets),
             objects=targets,
             start_frame=start_frame,
@@ -671,9 +661,7 @@ def export_animation_curves(
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:
         logger.exception("export_animation_curves failed")
-        return error_result(
-            "Failed to export animation curves for '{}'".format(object_name), str(exc)
-        ).to_dict()
+        return error_result("Failed to export animation curves for '{}'".format(object_name), str(exc)).to_dict()
 
 
 def import_animation_curves(
@@ -698,6 +686,7 @@ def import_animation_curves(
 
     try:
         import os  # noqa: PLC0415
+
         import maya.cmds as cmds  # noqa: PLC0415
 
         if not os.path.isfile(file_path):
@@ -743,9 +732,7 @@ def import_animation_curves(
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:
         logger.exception("import_animation_curves failed")
-        return error_result(
-            "Failed to import animation curves from '{}'".format(file_path), str(exc)
-        ).to_dict()
+        return error_result("Failed to import animation curves from '{}'".format(file_path), str(exc)).to_dict()
 
 
 def query_scene_time_info() -> dict:
@@ -795,10 +782,40 @@ _ACTIONS = [
     ("set_current_time", "Set the current frame number", "animation", ["time", "set"]),
     ("delete_keyframes", "Delete keyframes from an object in a frame range", "animation", ["keyframe", "delete"]),
     ("bake_simulation", "Bake simulation/constraints to keyframes", "animation", ["bake", "simulation", "keyframe"]),
-    ("list_animation_curves", "List animation curves for an object or scene", "animation", ["animation", "curves", "list", "query"]),
-    ("set_animation_curve_tangent", "Set the tangent type on keyframes of an animation curve", "animation", ["animation", "tangent", "curves"]),
-    ("bake_constraints", "Bake constraint-driven animation to explicit keyframes", "animation", ["bake", "constraints", "keyframe"]),
-    ("export_animation_curves", "Export animation curves for an object to a Maya file", "animation", ["animation", "export", "curves", "io"]),
-    ("import_animation_curves", "Import animation curves from a file into the scene", "animation", ["animation", "import", "curves", "io"]),
-    ("query_scene_time_info", "Query FPS, animation range, playback range and current time", "animation", ["time", "fps", "timeline", "query"]),
+    (
+        "list_animation_curves",
+        "List animation curves for an object or scene",
+        "animation",
+        ["animation", "curves", "list", "query"],
+    ),
+    (
+        "set_animation_curve_tangent",
+        "Set the tangent type on keyframes of an animation curve",
+        "animation",
+        ["animation", "tangent", "curves"],
+    ),
+    (
+        "bake_constraints",
+        "Bake constraint-driven animation to explicit keyframes",
+        "animation",
+        ["bake", "constraints", "keyframe"],
+    ),
+    (
+        "export_animation_curves",
+        "Export animation curves for an object to a Maya file",
+        "animation",
+        ["animation", "export", "curves", "io"],
+    ),
+    (
+        "import_animation_curves",
+        "Import animation curves from a file into the scene",
+        "animation",
+        ["animation", "import", "curves", "io"],
+    ),
+    (
+        "query_scene_time_info",
+        "Query FPS, animation range, playback range and current time",
+        "animation",
+        ["time", "fps", "timeline", "query"],
+    ),
 ]

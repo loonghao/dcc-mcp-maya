@@ -109,9 +109,7 @@ def create_curve(
         if len(points) < degree + 1:
             return error_result(
                 "Not enough control points",
-                "Need at least {} points for degree-{} curve, got {}".format(
-                    degree + 1, degree, len(points)
-                ),
+                "Need at least {} points for degree-{} curve, got {}".format(degree + 1, degree, len(points)),
             ).to_dict()
 
         point_tuples = [(p[0], p[1], p[2]) for p in points]
@@ -258,12 +256,7 @@ def mirror_joints(
             "XZ": {"mirrorXZ": True},
         }[mirror_axis]
 
-        mirrored = cmds.mirrorJoint(
-            joint_name,
-            mirrorBehavior=mirror_behavior,
-            searchReplace=sr,
-            **axis_kwargs
-        )
+        mirrored = cmds.mirrorJoint(joint_name, mirrorBehavior=mirror_behavior, searchReplace=sr, **axis_kwargs)
 
         return success_result(
             "Mirrored joint chain from '{}'".format(joint_name),
@@ -370,8 +363,7 @@ def assign_deformer(
     """
     from dcc_mcp_core import error_result, success_result  # noqa: PLC0415
 
-    _SUPPORTED = ("cluster", "blendShape", "lattice", "wrap",
-                  "bend", "twist", "flare", "sine", "squash", "wave")
+    _SUPPORTED = ("cluster", "blendShape", "lattice", "wrap", "bend", "twist", "flare", "sine", "squash", "wave")
 
     try:
         import maya.cmds as cmds  # noqa: PLC0415
@@ -650,9 +642,7 @@ def set_joint_limit(
         actual_max = cmds.getAttr("{}.{}".format(joint_name, max_attr))
 
         return success_result(
-            "Set rotation limit on '{}.{}': [{}, {}]".format(
-                joint_name, axis_lower, actual_min, actual_max
-            ),
+            "Set rotation limit on '{}.{}': [{}, {}]".format(joint_name, axis_lower, actual_min, actual_max),
             joint_name=joint_name,
             axis=axis_lower,
             min_angle=actual_min,
@@ -663,9 +653,7 @@ def set_joint_limit(
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:
         logger.exception("set_joint_limit failed")
-        return error_result(
-            "Failed to set joint limit on {}".format(joint_name), str(exc)
-        ).to_dict()
+        return error_result("Failed to set joint limit on {}".format(joint_name), str(exc)).to_dict()
 
 
 def blend_shape_add_target(
@@ -704,9 +692,7 @@ def blend_shape_add_target(
 
         node_type = cmds.objectType(blend_shape)
         if node_type != "blendShape":
-            return error_result(
-                "'{}' is not a blendShape node (type: {})".format(blend_shape, node_type)
-            ).to_dict()
+            return error_result("'{}' is not a blendShape node (type: {})".format(blend_shape, node_type)).to_dict()
 
         if not cmds.objExists(target_mesh):
             return error_result("Target mesh not found: {}".format(target_mesh)).to_dict()
@@ -730,9 +716,7 @@ def blend_shape_add_target(
         )
 
         return success_result(
-            "Added target '{}' to blend shape '{}' at index {}".format(
-                target_mesh, blend_shape, target_index
-            ),
+            "Added target '{}' to blend shape '{}' at index {}".format(target_mesh, blend_shape, target_index),
             blend_shape=blend_shape,
             target_mesh=target_mesh,
             target_index=target_index,
@@ -742,9 +726,7 @@ def blend_shape_add_target(
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:
         logger.exception("blend_shape_add_target failed")
-        return error_result(
-            "Failed to add blend shape target", str(exc)
-        ).to_dict()
+        return error_result("Failed to add blend shape target", str(exc)).to_dict()
 
 
 def set_driven_key(
@@ -907,9 +889,7 @@ def set_ik_fk_blend(
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:
         logger.exception("set_ik_fk_blend failed")
-        return error_result(
-            "Failed to set IK/FK blend on '{}'".format(ik_handle), str(exc)
-        ).to_dict()
+        return error_result("Failed to set IK/FK blend on '{}'".format(ik_handle), str(exc)).to_dict()
 
 
 _ACTIONS = [
@@ -918,11 +898,31 @@ _ACTIONS = [
     ("set_joint_orient", "Set the joint orientation of a joint node", "rigging", ["joint", "orient", "rigging"]),
     ("mirror_joints", "Mirror a joint chain across an axis plane", "rigging", ["joint", "mirror", "rigging"]),
     ("create_ik_handle", "Create an IK handle between two joints", "rigging", ["ik", "handle", "rigging"]),
-    ("assign_deformer", "Apply a deformer (cluster/lattice/nonLinear) to an object", "rigging", ["deformer", "cluster", "lattice", "rigging"]),
-    ("create_blend_shape", "Create a blend shape deformer on a base mesh", "rigging", ["blendshape", "deformer", "rigging"]),
+    (
+        "assign_deformer",
+        "Apply a deformer (cluster/lattice/nonLinear) to an object",
+        "rigging",
+        ["deformer", "cluster", "lattice", "rigging"],
+    ),
+    (
+        "create_blend_shape",
+        "Create a blend shape deformer on a base mesh",
+        "rigging",
+        ["blendshape", "deformer", "rigging"],
+    ),
     ("skin_cluster_bind", "Bind a mesh to joints using a skin cluster", "rigging", ["skin", "skincluster", "rigging"]),
-    ("blend_shape_add_target", "Add a target mesh to an existing blend shape deformer", "rigging", ["blendshape", "target", "deformer", "rigging"]),
-    ("set_driven_key", "Create a set-driven key relationship between driver and driven attributes", "rigging", ["sdk", "driven", "key", "animation", "rigging"]),
+    (
+        "blend_shape_add_target",
+        "Add a target mesh to an existing blend shape deformer",
+        "rigging",
+        ["blendshape", "target", "deformer", "rigging"],
+    ),
+    (
+        "set_driven_key",
+        "Create a set-driven key relationship between driver and driven attributes",
+        "rigging",
+        ["sdk", "driven", "key", "animation", "rigging"],
+    ),
     ("set_ik_fk_blend", "Set IK/FK blend weight on a joint chain", "rigging", ["ik", "fk", "blend", "rigging"]),
     ("set_joint_limit", "Set rotation limits on a joint axis", "rigging", ["joint", "limit", "rotation", "rigging"]),
 ]

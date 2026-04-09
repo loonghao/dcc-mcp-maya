@@ -5,7 +5,7 @@ from __future__ import annotations
 
 # Import built-in modules
 import logging
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -131,9 +131,7 @@ def set_light_attribute(
             # Attribute may be on transform instead
             full_attr = "{}.{}".format(light_name, attribute)
         if not cmds.objExists(full_attr):
-            return error_result(
-                "Attribute '{}' not found on '{}'".format(attribute, light_name)
-            ).to_dict()
+            return error_result("Attribute '{}' not found on '{}'".format(attribute, light_name)).to_dict()
 
         if isinstance(value, (list, tuple)) and len(value) == 3:
             cmds.setAttr(full_attr, value[0], value[1], value[2], type="double3")
@@ -199,14 +197,16 @@ def list_lights(include_default: bool = False) -> dict:
                 visible = bool(cmds.getAttr("{}.visibility".format(transform)))
             except Exception:
                 visible = True
-            results.append({
-                "name": transform,
-                "shape": shape,
-                "light_type": cmds.objectType(shape),
-                "intensity": intensity,
-                "color": color,
-                "visible": visible,
-            })
+            results.append(
+                {
+                    "name": transform,
+                    "shape": shape,
+                    "light_type": cmds.objectType(shape),
+                    "intensity": intensity,
+                    "color": color,
+                    "visible": visible,
+                }
+            )
 
         return success_result(
             "Found {} light(s)".format(len(results)),
@@ -254,7 +254,12 @@ def delete_light(light_name: str) -> dict:
 
 
 _ACTIONS = [
-    ("create_light", "Create a Maya light (point/spot/directional/area/ambient)", "lighting", ["light", "create", "scene"]),
+    (
+        "create_light",
+        "Create a Maya light (point/spot/directional/area/ambient)",
+        "lighting",
+        ["light", "create", "scene"],
+    ),
     ("set_light_attribute", "Set an attribute on a Maya light node", "lighting", ["light", "attribute", "set"]),
     ("list_lights", "List all lights in the scene with attributes", "lighting", ["light", "list", "query"]),
     ("delete_light", "Delete a light from the scene", "lighting", ["light", "delete", "scene"]),

@@ -13,10 +13,10 @@ from unittest.mock import MagicMock, patch
 # Import third-party modules
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Shared Maya mock fixture
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture()
 def mock_maya():
@@ -67,6 +67,7 @@ def _reload():
 # Helper: simulate Maya ImportError
 # ---------------------------------------------------------------------------
 
+
 def _no_maya_context():
     """Context manager that removes maya from sys.modules to trigger ImportError."""
     return patch.dict(sys.modules, {"maya": None, "maya.cmds": None, "maya.mel": None})
@@ -75,6 +76,7 @@ def _no_maya_context():
 # ---------------------------------------------------------------------------
 # Primitive Actions — happy path
 # ---------------------------------------------------------------------------
+
 
 class TestCreatePlane:
     def test_create_plane_default(self, mock_maya):
@@ -197,6 +199,7 @@ class TestRenameObject:
 # Primitive Actions — error paths for existing actions
 # ---------------------------------------------------------------------------
 
+
 class TestPrimitivesErrorPaths:
     def test_create_sphere_no_maya(self):
         _reload()
@@ -302,7 +305,6 @@ class TestPrimitivesErrorPaths:
         assert result["context"]["deleted"] == []
 
     def test_set_transform_rotate_scale(self, mock_maya):
-
         """Cover rotate and scale branches in set_transform."""
         _reload()
         from dcc_mcp_maya.actions.primitives import set_transform
@@ -335,6 +337,7 @@ class TestPrimitivesErrorPaths:
 # ---------------------------------------------------------------------------
 # Scene Actions — error paths
 # ---------------------------------------------------------------------------
+
 
 class TestSceneErrorPaths:
     def test_save_scene_no_maya(self):
@@ -487,6 +490,7 @@ class TestSceneErrorPaths:
 # Scripting Actions — error paths
 # ---------------------------------------------------------------------------
 
+
 class TestScriptingErrorPaths:
     def test_execute_mel_no_maya(self):
         _reload()
@@ -522,6 +526,7 @@ class TestScriptingErrorPaths:
 # ---------------------------------------------------------------------------
 # Material Actions
 # ---------------------------------------------------------------------------
+
 
 class TestCreateMaterial:
     def test_create_lambert_default(self, mock_maya):
@@ -704,6 +709,7 @@ class TestListMaterials:
 # Register all — updated count
 # ---------------------------------------------------------------------------
 
+
 class TestRegisterAllUpdated:
     def test_register_all_has_new_actions(self):
         _reload()
@@ -741,6 +747,7 @@ class TestRegisterAllUpdated:
 # ---------------------------------------------------------------------------
 # Scene Hierarchy Actions
 # ---------------------------------------------------------------------------
+
 
 class TestGroupObjects:
     def test_group_success(self, mock_maya):
@@ -921,6 +928,7 @@ class TestSelectByType:
 # Duplicate Object
 # ---------------------------------------------------------------------------
 
+
 class TestDuplicateObject:
     def test_duplicate_success(self, mock_maya):
         _reload()
@@ -986,6 +994,7 @@ class TestDuplicateObject:
 # Freeze Transforms
 # ---------------------------------------------------------------------------
 
+
 class TestFreezeTransforms:
     def test_freeze_success(self, mock_maya):
         _reload()
@@ -994,9 +1003,7 @@ class TestFreezeTransforms:
         result = freeze_transforms("pSphere1")
         assert result["success"] is True
         assert result["context"]["object_name"] == "pSphere1"
-        mock_maya.makeIdentity.assert_called_once_with(
-            "pSphere1", apply=True, translate=True, rotate=True, scale=True
-        )
+        mock_maya.makeIdentity.assert_called_once_with("pSphere1", apply=True, translate=True, rotate=True, scale=True)
 
     def test_freeze_object_not_found(self, mock_maya):
         _reload()
@@ -1029,6 +1036,7 @@ class TestFreezeTransforms:
 # ---------------------------------------------------------------------------
 # Center Pivot
 # ---------------------------------------------------------------------------
+
 
 class TestCenterPivot:
     def test_center_pivot_success(self, mock_maya):
@@ -1072,6 +1080,7 @@ class TestCenterPivot:
 # ---------------------------------------------------------------------------
 # Get Bounding Box
 # ---------------------------------------------------------------------------
+
 
 class TestGetBoundingBox:
     def test_get_bbox_success(self, mock_maya):
@@ -1118,6 +1127,7 @@ class TestGetBoundingBox:
 # ---------------------------------------------------------------------------
 # Set Visibility
 # ---------------------------------------------------------------------------
+
 
 class TestSetVisibility:
     def test_set_visible(self, mock_maya):
@@ -1170,6 +1180,7 @@ class TestSetVisibility:
 # Lock Object
 # ---------------------------------------------------------------------------
 
+
 class TestLockObject:
     def test_lock_success(self, mock_maya):
         _reload()
@@ -1220,6 +1231,7 @@ class TestLockObject:
 # Register all — updated count with new actions
 # ---------------------------------------------------------------------------
 
+
 class TestRegisterAllWithNewActions:
     def test_register_all_has_six_new_actions(self):
         _reload()
@@ -1239,4 +1251,3 @@ class TestRegisterAllWithNewActions:
         assert "set_visibility" in names
         assert "lock_object" in names
         assert len(actions) >= 39
-

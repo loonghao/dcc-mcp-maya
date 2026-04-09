@@ -341,9 +341,7 @@ def set_object_color(
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:
         logger.exception("set_object_color failed")
-        return error_result(
-            "Failed to set object color on '{}'".format(object_name), str(exc)
-        ).to_dict()
+        return error_result("Failed to set object color on '{}'".format(object_name), str(exc)).to_dict()
 
 
 def toggle_gpu_override(
@@ -401,9 +399,7 @@ def toggle_gpu_override(
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:
         logger.exception("toggle_gpu_override failed")
-        return error_result(
-            "Failed to toggle GPU override on '{}'".format(object_name), str(exc)
-        ).to_dict()
+        return error_result("Failed to toggle GPU override on '{}'".format(object_name), str(exc)).to_dict()
 
 
 def create_polygon_text(
@@ -562,8 +558,28 @@ def set_shading_mode(
 _ACTIONS = [
     ("set_pivot", "Set the rotate and/or scale pivot of an object", "scene", ["pivot", "transform", "scene"]),
     ("align_objects", "Align objects along a world-space axis", "scene", ["align", "transform", "scene"]),
-    ("create_annotation", "Create a viewport annotation label on an object", "scene", ["annotation", "label", "viewport"]),
-    ("set_object_color", "Set the wireframe override colour of an object by index", "scene", ["color", "wireframe", "override", "display"]),
-    ("toggle_gpu_override", "Toggle GPU cache override display mode on a Maya object", "scene", ["gpu", "override", "display", "bbox"]),
-    ("set_shading_mode", "Set the viewport shading mode (wireframe/smooth/textured/flat/bounding_box)", "utility", ["shading", "viewport", "display", "mode"]),
+    (
+        "create_annotation",
+        "Create a viewport annotation label on an object",
+        "scene",
+        ["annotation", "label", "viewport"],
+    ),
+    (
+        "set_object_color",
+        "Set the wireframe override colour of an object by index",
+        "scene",
+        ["color", "wireframe", "override", "display"],
+    ),
+    (
+        "toggle_gpu_override",
+        "Toggle GPU cache override display mode on a Maya object",
+        "scene",
+        ["gpu", "override", "display", "bbox"],
+    ),
+    (
+        "set_shading_mode",
+        "Set the viewport shading mode (wireframe/smooth/textured/flat/bounding_box)",
+        "utility",
+        ["shading", "viewport", "display", "mode"],
+    ),
 ]

@@ -50,9 +50,7 @@ def set_vertex_color(
             kwargs["colorSet"] = color_set
 
         if vertices is not None:
-            vertex_components = [
-                "{}.vtx[{}]".format(object_name, v) for v in vertices
-            ]
+            vertex_components = ["{}.vtx[{}]".format(object_name, v) for v in vertices]
             for comp in vertex_components:
                 cmds.polyColorPerVertex(comp, **kwargs)
             colored_count = len(vertices)
@@ -112,9 +110,7 @@ def get_vertex_color(
         if vertex_index is not None:
             component = "{}.vtx[{}]".format(object_name, vertex_index)
             if not cmds.objExists(component):
-                return error_result(
-                    "Vertex {} not found on '{}'".format(vertex_index, object_name)
-                ).to_dict()
+                return error_result("Vertex {} not found on '{}'".format(vertex_index, object_name)).to_dict()
 
             query_kwargs = {}  # type: dict
             if color_set:
@@ -130,9 +126,7 @@ def get_vertex_color(
                 result_kwargs["color"] = [1.0, 1.0, 1.0]
                 result_kwargs["alpha"] = 1.0
 
-        return success_result(
-            "Vertex color info for '{}'".format(object_name), **result_kwargs
-        ).to_dict()
+        return success_result("Vertex color info for '{}'".format(object_name), **result_kwargs).to_dict()
     except ImportError:
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:
@@ -173,9 +167,7 @@ def create_color_set(
 
         existing = cmds.polyColorSet(object_name, query=True, allColorSets=True) or []
         if color_set_name in existing:
-            return error_result(
-                "Color set '{}' already exists on '{}'".format(color_set_name, object_name)
-            ).to_dict()
+            return error_result("Color set '{}' already exists on '{}'".format(color_set_name, object_name)).to_dict()
 
         cmds.polyColorSet(
             object_name,
@@ -219,9 +211,7 @@ def remove_vertex_colors(object_name: str, color_set: Optional[str] = None) -> d
         if color_set:
             existing = cmds.polyColorSet(object_name, query=True, allColorSets=True) or []
             if color_set not in existing:
-                return error_result(
-                    "Color set '{}' not found on '{}'".format(color_set, object_name)
-                ).to_dict()
+                return error_result("Color set '{}' not found on '{}'".format(color_set, object_name)).to_dict()
             cmds.polyColorSet(object_name, delete=True, colorSet=color_set)
             removed = [color_set]
         else:
@@ -244,7 +234,22 @@ def remove_vertex_colors(object_name: str, color_set: Optional[str] = None) -> d
 
 _ACTIONS = [
     ("set_vertex_color", "Set vertex color on a polygon mesh", "geometry", ["vertex", "color", "paint", "mesh"]),
-    ("get_vertex_color", "Get vertex color information from a polygon mesh", "geometry", ["vertex", "color", "query", "mesh"]),
-    ("create_color_set", "Create a new vertex color set on a polygon mesh", "geometry", ["vertex", "color", "colorset", "mesh"]),
-    ("remove_vertex_colors", "Remove vertex colors from a polygon mesh", "geometry", ["vertex", "color", "remove", "mesh"]),
+    (
+        "get_vertex_color",
+        "Get vertex color information from a polygon mesh",
+        "geometry",
+        ["vertex", "color", "query", "mesh"],
+    ),
+    (
+        "create_color_set",
+        "Create a new vertex color set on a polygon mesh",
+        "geometry",
+        ["vertex", "color", "colorset", "mesh"],
+    ),
+    (
+        "remove_vertex_colors",
+        "Remove vertex colors from a polygon mesh",
+        "geometry",
+        ["vertex", "color", "remove", "mesh"],
+    ),
 ]

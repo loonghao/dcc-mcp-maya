@@ -64,7 +64,9 @@ def create_nucleus(
         cmds.setAttr("{}.windSpeed".format(nucleus_node), wind_speed)
         cmds.setAttr(
             "{}.windDirection".format(nucleus_node),
-            wind_dir[0], wind_dir[1], wind_dir[2],
+            wind_dir[0],
+            wind_dir[1],
+            wind_dir[2],
             type="double3",
         )
 
@@ -147,9 +149,7 @@ def set_nucleus_attribute(
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:
         logger.exception("set_nucleus_attribute failed")
-        return error_result(
-            "Failed to set attribute on nucleus '{}'".format(nucleus), str(exc)
-        ).to_dict()
+        return error_result("Failed to set attribute on nucleus '{}'".format(nucleus), str(exc)).to_dict()
 
 
 def create_dynamic_field(
@@ -285,9 +285,7 @@ def connect_field_to_objects(
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:
         logger.exception("connect_field_to_objects failed")
-        return error_result(
-            "Failed to connect field '{}' to objects".format(field_node), str(exc)
-        ).to_dict()
+        return error_result("Failed to connect field '{}' to objects".format(field_node), str(exc)).to_dict()
 
 
 def create_ncloth(
@@ -501,9 +499,7 @@ def set_ncloth_attribute(
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:
         logger.exception("set_ncloth_attribute failed")
-        return error_result(
-            "Failed to set attribute on nCloth '{}'".format(ncloth_node), str(exc)
-        ).to_dict()
+        return error_result("Failed to set attribute on nCloth '{}'".format(ncloth_node), str(exc)).to_dict()
 
 
 def list_ncloth_nodes() -> dict:
@@ -530,19 +526,19 @@ def list_ncloth_nodes() -> dict:
 
             # Try to find connected nucleus solver
             nucleus = None
-            connections = cmds.listConnections(
-                "{}.startFrame".format(shape), source=True, destination=False
-            ) or []
+            connections = cmds.listConnections("{}.startFrame".format(shape), source=True, destination=False) or []
             for conn in connections:
                 if cmds.objectType(conn) == "nucleus":
                     nucleus = conn
                     break
 
-            nodes.append({
-                "name": shape,
-                "transform": parent,
-                "nucleus": nucleus,
-            })
+            nodes.append(
+                {
+                    "name": shape,
+                    "transform": parent,
+                    "nucleus": nucleus,
+                }
+            )
 
         return success_result(
             "Found {} nCloth node(s) in scene".format(len(nodes)),
@@ -649,22 +645,19 @@ def list_nrigid_nodes():
             parent = parent_transforms[0] if parent_transforms else None
 
             nucleus = None
-            connections = (
-                cmds.listConnections(
-                    "{}.startFrame".format(shape), source=True, destination=False
-                )
-                or []
-            )
+            connections = cmds.listConnections("{}.startFrame".format(shape), source=True, destination=False) or []
             for conn in connections:
                 if cmds.objectType(conn) == "nucleus":
                     nucleus = conn
                     break
 
-            nodes.append({
-                "name": shape,
-                "transform": parent,
-                "nucleus": nucleus,
-            })
+            nodes.append(
+                {
+                    "name": shape,
+                    "transform": parent,
+                    "nucleus": nucleus,
+                }
+            )
 
         return success_result(
             "Found {} nRigid node(s) in scene".format(len(nodes)),
@@ -679,14 +672,64 @@ def list_nrigid_nodes():
 
 
 _ACTIONS = [
-    ("create_nucleus", "Create an nDynamics nucleus solver node", "effects", ["nucleus", "ndynamics", "solver", "effects"]),
-    ("set_nucleus_attribute", "Set an attribute on a Maya nucleus solver node", "effects", ["nucleus", "attribute", "ndynamics", "effects"]),
-    ("create_dynamic_field", "Create a Maya dynamic field (gravity/turbulence/radial/etc.)", "effects", ["field", "dynamic", "gravity", "effects"]),
-    ("connect_field_to_objects", "Connect a dynamic field to particle or nCloth objects", "effects", ["field", "connect", "particle", "effects"]),
-    ("create_ncloth", "Create an nCloth dynamic cloth simulation on a polygon mesh", "effects", ["ncloth", "cloth", "simulation", "ndynamics", "effects"]),
-    ("create_nrigid", "Create a passive nRigid collider on a polygon mesh", "effects", ["nrigid", "collider", "passive", "ndynamics", "effects"]),
-    ("set_ncloth_attribute", "Set an attribute on a Maya nCloth shape node", "effects", ["ncloth", "attribute", "set", "simulation", "effects"]),
-    ("list_ncloth_nodes", "List all nCloth shape nodes in the current Maya scene", "effects", ["ncloth", "list", "query", "effects"]),
-    ("set_nrigid_attribute", "Set an attribute on a Maya nRigid (passive collider) shape node", "effects", ["nrigid", "attribute", "set", "collider", "effects"]),
-    ("list_nrigid_nodes", "List all nRigid (passive collider) shape nodes in the current Maya scene", "effects", ["nrigid", "list", "query", "effects"]),
+    (
+        "create_nucleus",
+        "Create an nDynamics nucleus solver node",
+        "effects",
+        ["nucleus", "ndynamics", "solver", "effects"],
+    ),
+    (
+        "set_nucleus_attribute",
+        "Set an attribute on a Maya nucleus solver node",
+        "effects",
+        ["nucleus", "attribute", "ndynamics", "effects"],
+    ),
+    (
+        "create_dynamic_field",
+        "Create a Maya dynamic field (gravity/turbulence/radial/etc.)",
+        "effects",
+        ["field", "dynamic", "gravity", "effects"],
+    ),
+    (
+        "connect_field_to_objects",
+        "Connect a dynamic field to particle or nCloth objects",
+        "effects",
+        ["field", "connect", "particle", "effects"],
+    ),
+    (
+        "create_ncloth",
+        "Create an nCloth dynamic cloth simulation on a polygon mesh",
+        "effects",
+        ["ncloth", "cloth", "simulation", "ndynamics", "effects"],
+    ),
+    (
+        "create_nrigid",
+        "Create a passive nRigid collider on a polygon mesh",
+        "effects",
+        ["nrigid", "collider", "passive", "ndynamics", "effects"],
+    ),
+    (
+        "set_ncloth_attribute",
+        "Set an attribute on a Maya nCloth shape node",
+        "effects",
+        ["ncloth", "attribute", "set", "simulation", "effects"],
+    ),
+    (
+        "list_ncloth_nodes",
+        "List all nCloth shape nodes in the current Maya scene",
+        "effects",
+        ["ncloth", "list", "query", "effects"],
+    ),
+    (
+        "set_nrigid_attribute",
+        "Set an attribute on a Maya nRigid (passive collider) shape node",
+        "effects",
+        ["nrigid", "attribute", "set", "collider", "effects"],
+    ),
+    (
+        "list_nrigid_nodes",
+        "List all nRigid (passive collider) shape nodes in the current Maya scene",
+        "effects",
+        ["nrigid", "list", "query", "effects"],
+    ),
 ]

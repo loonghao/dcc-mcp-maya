@@ -5,7 +5,7 @@ from __future__ import annotations
 
 # Import built-in modules
 import logging
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -202,9 +202,7 @@ def create_lattice(
             cmds.setAttr("{}.sz".format(lattice_node), local_scale[2])
 
         return success_result(
-            "Created FFD lattice '{}' ({}) on {} object(s)".format(
-                ffd_node, divs, len(objects)
-            ),
+            "Created FFD lattice '{}' ({}) on {} object(s)".format(ffd_node, divs, len(objects)),
             ffd_node=ffd_node,
             lattice_node=lattice_node,
             base_node=base_node,
@@ -353,9 +351,7 @@ def sculpt_deformer(
         sculpt_origin = result[2] if result and len(result) > 2 else None
 
         return success_result(
-            "Created sculpt deformer '{}' (mode='{}') on {} object(s)".format(
-                sculpt_node, mode_lower, len(objects)
-            ),
+            "Created sculpt deformer '{}' (mode='{}') on {} object(s)".format(sculpt_node, mode_lower, len(objects)),
             sculpt_node=sculpt_node,
             sculpt_sphere=sculpt_sphere,
             sculpt_origin=sculpt_origin,
@@ -371,9 +367,34 @@ def sculpt_deformer(
 
 
 _ACTIONS = [
-    ("create_cluster", "Create a cluster deformer on one or more objects", "rigging", ["cluster", "deformer", "rigging"]),
-    ("set_cluster_weights", "Set per-vertex weights on a cluster deformer", "rigging", ["cluster", "weights", "deformer", "rigging"]),
-    ("create_lattice", "Create an FFD lattice deformer on one or more objects", "rigging", ["lattice", "ffd", "deformer", "rigging"]),
-    ("wire_deformer", "Create a wire deformer along one or more NURBS curves", "rigging", ["wire", "deformer", "nurbs", "rigging"]),
-    ("sculpt_deformer", "Create a sculpt deformer (stretch/project/flip) on objects", "rigging", ["sculpt", "deformer", "rigging"]),
+    (
+        "create_cluster",
+        "Create a cluster deformer on one or more objects",
+        "rigging",
+        ["cluster", "deformer", "rigging"],
+    ),
+    (
+        "set_cluster_weights",
+        "Set per-vertex weights on a cluster deformer",
+        "rigging",
+        ["cluster", "weights", "deformer", "rigging"],
+    ),
+    (
+        "create_lattice",
+        "Create an FFD lattice deformer on one or more objects",
+        "rigging",
+        ["lattice", "ffd", "deformer", "rigging"],
+    ),
+    (
+        "wire_deformer",
+        "Create a wire deformer along one or more NURBS curves",
+        "rigging",
+        ["wire", "deformer", "nurbs", "rigging"],
+    ),
+    (
+        "sculpt_deformer",
+        "Create a sculpt deformer (stretch/project/flip) on objects",
+        "rigging",
+        ["sculpt", "deformer", "rigging"],
+    ),
 ]

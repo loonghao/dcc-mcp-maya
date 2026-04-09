@@ -263,7 +263,7 @@ def parent_object(child: str, parent: Optional[str] = None, world: bool = False)
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:
         logger.exception("parent_object failed")
-        return error_result("Failed to parent '{}'" .format(child), str(exc)).to_dict()
+        return error_result("Failed to parent '{}'".format(child), str(exc)).to_dict()
 
 
 def select_by_type(object_type: str) -> dict:
@@ -542,9 +542,15 @@ def lock_object(object_name: str, lock: bool = True) -> dict:
             ).to_dict()
 
         _LOCK_ATTRS = [
-            "translateX", "translateY", "translateZ",
-            "rotateX", "rotateY", "rotateZ",
-            "scaleX", "scaleY", "scaleZ",
+            "translateX",
+            "translateY",
+            "translateZ",
+            "rotateX",
+            "rotateY",
+            "rotateZ",
+            "scaleX",
+            "scaleY",
+            "scaleZ",
         ]
         for attr in _LOCK_ATTRS:
             cmds.setAttr("{}.{}".format(object_name, attr), lock=lock)
@@ -664,9 +670,21 @@ def set_frame_rate(fps: str = "film") -> dict:
     """
     from dcc_mcp_core import error_result, success_result  # noqa: PLC0415
 
-    _VALID_FPS = {"game", "film", "pal", "ntsc", "show", "palf", "ntscf",
-                  "23.976fps", "29.97fps", "47.952fps", "59.94fps",
-                  "44100fps", "48000fps"}
+    _VALID_FPS = {
+        "game",
+        "film",
+        "pal",
+        "ntsc",
+        "show",
+        "palf",
+        "ntscf",
+        "23.976fps",
+        "29.97fps",
+        "47.952fps",
+        "59.94fps",
+        "44100fps",
+        "48000fps",
+    }
 
     try:
         import maya.cmds as cmds  # noqa: PLC0415
@@ -704,8 +722,7 @@ def list_cameras(include_default: bool = True) -> dict:
     """
     from dcc_mcp_core import error_result, success_result  # noqa: PLC0415
 
-    _DEFAULT_CAMERAS = {"persp", "top", "front", "side",
-                        "perspShape", "topShape", "frontShape", "sideShape"}
+    _DEFAULT_CAMERAS = {"persp", "top", "front", "side", "perspShape", "topShape", "frontShape", "sideShape"}
 
     try:
         import maya.cmds as cmds  # noqa: PLC0415
@@ -795,7 +812,12 @@ _ACTIONS = [
     ("get_bounding_box", "Query the world-space bounding box of an object", "scene", ["bounding_box", "query"]),
     ("set_visibility", "Show or hide an object", "scene", ["visibility", "display"]),
     ("lock_object", "Lock or unlock the transform attributes of an object", "scene", ["lock", "transform"]),
-    ("get_scene_info", "Return a hierarchical DAG description of the current scene", "scene", ["scene", "info", "query", "hierarchy"]),
+    (
+        "get_scene_info",
+        "Return a hierarchical DAG description of the current scene",
+        "scene",
+        ["scene", "info", "query", "hierarchy"],
+    ),
     ("export_scene", "Export the entire current scene to a file", "scene", ["export", "io"]),
     ("set_frame_rate", "Change the scene playback frame rate", "scene", ["fps", "time", "settings"]),
     ("list_cameras", "List all cameras in the scene", "scene", ["camera", "list", "query"]),

@@ -48,13 +48,17 @@ def create_camera(
         if position and len(position) >= 3:
             cmds.setAttr(
                 "{}.translate".format(transform),
-                position[0], position[1], position[2],
+                position[0],
+                position[1],
+                position[2],
                 type="double3",
             )
         if rotation and len(rotation) >= 3:
             cmds.setAttr(
                 "{}.rotate".format(transform),
-                rotation[0], rotation[1], rotation[2],
+                rotation[0],
+                rotation[1],
+                rotation[2],
                 type="double3",
             )
 
@@ -105,9 +109,7 @@ def set_camera_attribute(
         if not cmds.objExists(full_attr):
             full_attr = "{}.{}".format(camera_name, attribute)
         if not cmds.objExists(full_attr):
-            return error_result(
-                "Attribute '{}' not found on camera '{}'".format(attribute, camera_name)
-            ).to_dict()
+            return error_result("Attribute '{}' not found on camera '{}'".format(attribute, camera_name)).to_dict()
 
         if isinstance(value, str):
             cmds.setAttr(full_attr, value, type="string")
@@ -178,10 +180,7 @@ def get_camera_info(camera_name: str) -> dict:
             except Exception:
                 info[axis_attr] = [0.0, 0.0, 0.0]
 
-        return success_result(
-            "Camera info for '{}'".format(transform),
-            **info
-        ).to_dict()
+        return success_result("Camera info for '{}'".format(transform), **info).to_dict()
     except ImportError:
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:

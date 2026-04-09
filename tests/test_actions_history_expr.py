@@ -10,10 +10,10 @@ from unittest.mock import MagicMock
 # Import third-party modules
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
+
 
 def _make_cmds():
     """Return a MagicMock configured with sensible Maya cmds defaults."""
@@ -43,6 +43,7 @@ def mock_maya(monkeypatch):
 # list_history
 # ===========================================================================
 
+
 class TestListHistory:
     def test_happy_path(self, mock_maya):
         mock_maya.objExists.return_value = True
@@ -50,6 +51,7 @@ class TestListHistory:
         mock_maya.objectType.side_effect = lambda n: "polySphere" if "poly" in n else "transform"
 
         from dcc_mcp_maya.actions.node_graph import list_history
+
         result = list_history("pSphere1")
         assert result["success"] is True
         context = result["context"]
@@ -62,6 +64,7 @@ class TestListHistory:
         mock_maya.listHistory.return_value = []
 
         from dcc_mcp_maya.actions.node_graph import list_history
+
         result = list_history("pSphere1", future=True)
         assert result["success"] is True
         call_kwargs = mock_maya.listHistory.call_args[1]
@@ -72,6 +75,7 @@ class TestListHistory:
         mock_maya.listHistory.return_value = []
 
         from dcc_mcp_maya.actions.node_graph import list_history
+
         result = list_history("pSphere1", levels=3)
         assert result["success"] is True
         call_kwargs = mock_maya.listHistory.call_args[1]
@@ -81,6 +85,7 @@ class TestListHistory:
         mock_maya.objExists.return_value = False
 
         from dcc_mcp_maya.actions.node_graph import list_history
+
         result = list_history("nonexistent")
         assert result["success"] is False
         assert "not found" in result["message"].lower()
@@ -90,6 +95,7 @@ class TestListHistory:
         mock_maya.listHistory.return_value = []
 
         from dcc_mcp_maya.actions.node_graph import list_history
+
         result = list_history("pSphere1")
         assert result["success"] is True
         assert result["context"]["count"] == 0
@@ -100,6 +106,7 @@ class TestListHistory:
         mock_maya.listHistory.return_value = None
 
         from dcc_mcp_maya.actions.node_graph import list_history
+
         result = list_history("pSphere1")
         assert result["success"] is True
         assert result["context"]["count"] == 0
@@ -109,6 +116,7 @@ class TestListHistory:
         monkeypatch.setitem(sys.modules, "maya.cmds", None)
 
         from dcc_mcp_maya.actions.node_graph import list_history
+
         result = list_history("pSphere1")
         assert result["success"] is False
 
@@ -117,6 +125,7 @@ class TestListHistory:
         mock_maya.listHistory.side_effect = RuntimeError("history error")
 
         from dcc_mcp_maya.actions.node_graph import list_history
+
         result = list_history("pSphere1")
         assert result["success"] is False
 
@@ -125,11 +134,13 @@ class TestListHistory:
 # delete_history
 # ===========================================================================
 
+
 class TestDeleteHistory:
     def test_happy_path(self, mock_maya):
         mock_maya.objExists.return_value = True
 
         from dcc_mcp_maya.actions.node_graph import delete_history
+
         result = delete_history("pSphere1")
         assert result["success"] is True
         mock_maya.delete.assert_called_once_with("pSphere1", constructionHistory=True)
@@ -138,6 +149,7 @@ class TestDeleteHistory:
         mock_maya.objExists.return_value = True
 
         from dcc_mcp_maya.actions.node_graph import delete_history
+
         result = delete_history("pCube1")
         assert result["context"]["object_name"] == "pCube1"
 
@@ -145,6 +157,7 @@ class TestDeleteHistory:
         mock_maya.objExists.return_value = False
 
         from dcc_mcp_maya.actions.node_graph import delete_history
+
         result = delete_history("ghost")
         assert result["success"] is False
         assert "not found" in result["message"].lower()
@@ -153,6 +166,7 @@ class TestDeleteHistory:
         monkeypatch.setitem(sys.modules, "maya.cmds", None)
 
         from dcc_mcp_maya.actions.node_graph import delete_history
+
         result = delete_history("pSphere1")
         assert result["success"] is False
 
@@ -161,6 +175,7 @@ class TestDeleteHistory:
         mock_maya.delete.side_effect = RuntimeError("delete error")
 
         from dcc_mcp_maya.actions.node_graph import delete_history
+
         result = delete_history("pSphere1")
         assert result["success"] is False
 
@@ -169,11 +184,13 @@ class TestDeleteHistory:
 # apply_symmetry
 # ===========================================================================
 
+
 class TestApplySymmetry:
     def test_happy_path_x(self, mock_maya):
         mock_maya.objExists.return_value = True
 
         from dcc_mcp_maya.actions.node_graph import apply_symmetry
+
         result = apply_symmetry("pSphere1", axis="x")
         assert result["success"] is True
         assert result["context"]["axis"] == "x"
@@ -183,6 +200,7 @@ class TestApplySymmetry:
         mock_maya.objExists.return_value = True
 
         from dcc_mcp_maya.actions.node_graph import apply_symmetry
+
         result = apply_symmetry("pSphere1", axis="y")
         assert result["success"] is True
         assert result["context"]["axis"] == "y"
@@ -191,6 +209,7 @@ class TestApplySymmetry:
         mock_maya.objExists.return_value = True
 
         from dcc_mcp_maya.actions.node_graph import apply_symmetry
+
         result = apply_symmetry("pSphere1", axis="z")
         assert result["success"] is True
 
@@ -198,6 +217,7 @@ class TestApplySymmetry:
         mock_maya.objExists.return_value = True
 
         from dcc_mcp_maya.actions.node_graph import apply_symmetry
+
         result = apply_symmetry("pSphere1", axis="none")
         assert result["success"] is True
         mock_maya.symmetricModelling.assert_called_with(symmetry=False)
@@ -206,6 +226,7 @@ class TestApplySymmetry:
         mock_maya.objExists.return_value = True
 
         from dcc_mcp_maya.actions.node_graph import apply_symmetry
+
         result = apply_symmetry("pSphere1", axis="w")
         assert result["success"] is False
         assert "axis" in result["message"].lower()
@@ -214,6 +235,7 @@ class TestApplySymmetry:
         mock_maya.objExists.return_value = False
 
         from dcc_mcp_maya.actions.node_graph import apply_symmetry
+
         result = apply_symmetry("ghost", axis="x")
         assert result["success"] is False
 
@@ -221,6 +243,7 @@ class TestApplySymmetry:
         mock_maya.objExists.return_value = True
 
         from dcc_mcp_maya.actions.node_graph import apply_symmetry
+
         result = apply_symmetry("pSphere1", axis="y", world_space=False)
         assert result["success"] is True
         call_kwargs = mock_maya.symmetricModelling.call_args[1]
@@ -230,6 +253,7 @@ class TestApplySymmetry:
         mock_maya.objExists.return_value = True
 
         from dcc_mcp_maya.actions.node_graph import apply_symmetry
+
         result = apply_symmetry("pSphere1", axis="x")
         assert result["context"]["world_space"] is True
 
@@ -237,6 +261,7 @@ class TestApplySymmetry:
         monkeypatch.setitem(sys.modules, "maya.cmds", None)
 
         from dcc_mcp_maya.actions.node_graph import apply_symmetry
+
         result = apply_symmetry("pSphere1")
         assert result["success"] is False
 
@@ -245,6 +270,7 @@ class TestApplySymmetry:
         mock_maya.symmetricModelling.side_effect = RuntimeError("sym error")
 
         from dcc_mcp_maya.actions.node_graph import apply_symmetry
+
         result = apply_symmetry("pSphere1", axis="x")
         assert result["success"] is False
 
@@ -253,6 +279,7 @@ class TestApplySymmetry:
 # set_joint_limit
 # ===========================================================================
 
+
 class TestSetJointLimit:
     def test_happy_path(self, mock_maya):
         mock_maya.objExists.return_value = True
@@ -260,6 +287,7 @@ class TestSetJointLimit:
         mock_maya.getAttr.side_effect = [-45.0, 45.0]
 
         from dcc_mcp_maya.actions.rigging import set_joint_limit
+
         result = set_joint_limit("joint1", axis="x", min_angle=-45.0, max_angle=45.0)
         assert result["success"] is True
         ctx = result["context"]
@@ -274,6 +302,7 @@ class TestSetJointLimit:
         mock_maya.getAttr.side_effect = [0.0, 0.0]
 
         from dcc_mcp_maya.actions.rigging import set_joint_limit
+
         result = set_joint_limit("joint1", axis="y", enable=False)
         assert result["success"] is True
         assert result["context"]["enable"] is False
@@ -284,6 +313,7 @@ class TestSetJointLimit:
         mock_maya.getAttr.side_effect = [-90.0, 90.0]
 
         from dcc_mcp_maya.actions.rigging import set_joint_limit
+
         result = set_joint_limit("joint1", axis="z", min_angle=-90.0, max_angle=90.0)
         assert result["success"] is True
         assert result["context"]["axis"] == "z"
@@ -293,6 +323,7 @@ class TestSetJointLimit:
         mock_maya.objectType.return_value = "joint"
 
         from dcc_mcp_maya.actions.rigging import set_joint_limit
+
         result = set_joint_limit("joint1", axis="w")
         assert result["success"] is False
         assert "axis" in result["message"].lower()
@@ -302,6 +333,7 @@ class TestSetJointLimit:
         mock_maya.objectType.return_value = "transform"
 
         from dcc_mcp_maya.actions.rigging import set_joint_limit
+
         result = set_joint_limit("pSphere1", axis="x")
         assert result["success"] is False
         assert "joint" in result["message"].lower()
@@ -310,6 +342,7 @@ class TestSetJointLimit:
         mock_maya.objExists.return_value = False
 
         from dcc_mcp_maya.actions.rigging import set_joint_limit
+
         result = set_joint_limit("ghost", axis="x")
         assert result["success"] is False
         assert "not found" in result["message"].lower()
@@ -321,6 +354,7 @@ class TestSetJointLimit:
         mock_maya.getAttr.side_effect = [-180.0, 180.0]
 
         from dcc_mcp_maya.actions.rigging import set_joint_limit
+
         result = set_joint_limit("joint1", axis="z")
         assert result["success"] is True
 
@@ -330,6 +364,7 @@ class TestSetJointLimit:
         mock_maya.getAttr.side_effect = [-45.0, 45.0]
 
         from dcc_mcp_maya.actions.rigging import set_joint_limit
+
         set_joint_limit("joint1", axis="x", min_angle=-45.0, max_angle=45.0)
         # setAttr should be called at least 4 times: enable_min, enable_max, min, max
         assert mock_maya.setAttr.call_count >= 4
@@ -338,6 +373,7 @@ class TestSetJointLimit:
         monkeypatch.setitem(sys.modules, "maya.cmds", None)
 
         from dcc_mcp_maya.actions.rigging import set_joint_limit
+
         result = set_joint_limit("joint1", axis="x")
         assert result["success"] is False
 
@@ -347,6 +383,7 @@ class TestSetJointLimit:
         mock_maya.setAttr.side_effect = RuntimeError("locked attr")
 
         from dcc_mcp_maya.actions.rigging import set_joint_limit
+
         result = set_joint_limit("joint1", axis="x")
         assert result["success"] is False
 
@@ -355,11 +392,13 @@ class TestSetJointLimit:
 # create_expression
 # ===========================================================================
 
+
 class TestCreateExpression:
     def test_happy_path(self, mock_maya):
         mock_maya.expression.return_value = "expression1"
 
         from dcc_mcp_maya.actions.expressions import create_expression
+
         result = create_expression("pSphere1.tx = sin(time);")
         assert result["success"] is True
         assert result["context"]["expression_name"] == "expression1"
@@ -368,6 +407,7 @@ class TestCreateExpression:
         mock_maya.expression.return_value = "myExpr"
 
         from dcc_mcp_maya.actions.expressions import create_expression
+
         result = create_expression("pSphere1.tx = time;", name="myExpr")
         assert result["success"] is True
         call_kwargs = mock_maya.expression.call_args[1]
@@ -378,6 +418,7 @@ class TestCreateExpression:
         mock_maya.expression.return_value = "expression1"
 
         from dcc_mcp_maya.actions.expressions import create_expression
+
         result = create_expression("tx = sin(time);", object_name="pSphere1", attribute="translateX")
         assert result["success"] is True
         call_kwargs = mock_maya.expression.call_args[1]
@@ -388,22 +429,26 @@ class TestCreateExpression:
         mock_maya.objExists.return_value = False
 
         from dcc_mcp_maya.actions.expressions import create_expression
+
         result = create_expression("tx = 0;", object_name="ghost")
         assert result["success"] is False
 
     def test_empty_expression(self, mock_maya):
         from dcc_mcp_maya.actions.expressions import create_expression
+
         result = create_expression("")
         assert result["success"] is False
         assert "empty" in result["message"].lower()
 
     def test_whitespace_only_expression(self, mock_maya):
         from dcc_mcp_maya.actions.expressions import create_expression
+
         result = create_expression("   ")
         assert result["success"] is False
 
     def test_invalid_unit_conversion(self, mock_maya):
         from dcc_mcp_maya.actions.expressions import create_expression
+
         result = create_expression("tx = 0;", unit_conversion=99)
         assert result["success"] is False
 
@@ -411,6 +456,7 @@ class TestCreateExpression:
         mock_maya.expression.return_value = "expression1"
 
         from dcc_mcp_maya.actions.expressions import create_expression
+
         for uc in (0, 1, 2):
             result = create_expression("tx = 0;", unit_conversion=uc)
             assert result["success"] is True, "unit_conversion={} should succeed".format(uc)
@@ -419,6 +465,7 @@ class TestCreateExpression:
         monkeypatch.setitem(sys.modules, "maya.cmds", None)
 
         from dcc_mcp_maya.actions.expressions import create_expression
+
         result = create_expression("tx = 0;")
         assert result["success"] is False
 
@@ -426,6 +473,7 @@ class TestCreateExpression:
         mock_maya.expression.side_effect = RuntimeError("expr error")
 
         from dcc_mcp_maya.actions.expressions import create_expression
+
         result = create_expression("pSphere1.tx = sin(time);")
         assert result["success"] is False
 
@@ -433,6 +481,7 @@ class TestCreateExpression:
 # ===========================================================================
 # list_expressions
 # ===========================================================================
+
 
 class TestListExpressions:
     def test_happy_path_all(self, mock_maya):
@@ -444,6 +493,7 @@ class TestListExpressions:
         mock_maya.expression.side_effect = expr_string
 
         from dcc_mcp_maya.actions.expressions import list_expressions
+
         result = list_expressions()
         assert result["success"] is True
         assert result["context"]["count"] == 2
@@ -460,6 +510,7 @@ class TestListExpressions:
         mock_maya.expression.side_effect = expr_string
 
         from dcc_mcp_maya.actions.expressions import list_expressions
+
         result = list_expressions(object_name="pSphere1")
         assert result["success"] is True
         assert result["context"]["count"] == 1
@@ -469,6 +520,7 @@ class TestListExpressions:
         mock_maya.objExists.return_value = False
 
         from dcc_mcp_maya.actions.expressions import list_expressions
+
         result = list_expressions(object_name="ghost")
         assert result["success"] is False
 
@@ -476,6 +528,7 @@ class TestListExpressions:
         mock_maya.ls.return_value = []
 
         from dcc_mcp_maya.actions.expressions import list_expressions
+
         result = list_expressions()
         assert result["success"] is True
         assert result["context"]["count"] == 0
@@ -485,6 +538,7 @@ class TestListExpressions:
         mock_maya.expression.return_value = "tx = time;"
 
         from dcc_mcp_maya.actions.expressions import list_expressions
+
         result = list_expressions()
         assert result["context"]["expressions"][0]["string"] == "tx = time;"
 
@@ -492,6 +546,7 @@ class TestListExpressions:
         monkeypatch.setitem(sys.modules, "maya.cmds", None)
 
         from dcc_mcp_maya.actions.expressions import list_expressions
+
         result = list_expressions()
         assert result["success"] is False
 
@@ -499,6 +554,7 @@ class TestListExpressions:
         mock_maya.ls.side_effect = RuntimeError("ls error")
 
         from dcc_mcp_maya.actions.expressions import list_expressions
+
         result = list_expressions()
         assert result["success"] is False
 
@@ -507,12 +563,14 @@ class TestListExpressions:
 # delete_expression
 # ===========================================================================
 
+
 class TestDeleteExpression:
     def test_happy_path(self, mock_maya):
         mock_maya.objExists.return_value = True
         mock_maya.objectType.return_value = "expression"
 
         from dcc_mcp_maya.actions.expressions import delete_expression
+
         result = delete_expression("expression1")
         assert result["success"] is True
         mock_maya.delete.assert_called_once_with("expression1")
@@ -522,6 +580,7 @@ class TestDeleteExpression:
         mock_maya.objectType.return_value = "expression"
 
         from dcc_mcp_maya.actions.expressions import delete_expression
+
         result = delete_expression("myExpr")
         assert result["context"]["expression_name"] == "myExpr"
 
@@ -529,6 +588,7 @@ class TestDeleteExpression:
         mock_maya.objExists.return_value = False
 
         from dcc_mcp_maya.actions.expressions import delete_expression
+
         result = delete_expression("ghost")
         assert result["success"] is False
         assert "not found" in result["message"].lower()
@@ -538,6 +598,7 @@ class TestDeleteExpression:
         mock_maya.objectType.return_value = "transform"
 
         from dcc_mcp_maya.actions.expressions import delete_expression
+
         result = delete_expression("pSphere1")
         assert result["success"] is False
         assert "expression" in result["message"].lower()
@@ -546,6 +607,7 @@ class TestDeleteExpression:
         monkeypatch.setitem(sys.modules, "maya.cmds", None)
 
         from dcc_mcp_maya.actions.expressions import delete_expression
+
         result = delete_expression("expression1")
         assert result["success"] is False
 
@@ -555,6 +617,7 @@ class TestDeleteExpression:
         mock_maya.delete.side_effect = RuntimeError("locked")
 
         from dcc_mcp_maya.actions.expressions import delete_expression
+
         result = delete_expression("expression1")
         assert result["success"] is False
 
@@ -563,19 +626,28 @@ class TestDeleteExpression:
 # register_all includes new Round 7 actions
 # ===========================================================================
 
+
 class TestRegisterAllRound7:
     def test_register_count_at_least_70(self, mock_maya):
         from dcc_mcp_maya.actions import register_all
+
         registry = MagicMock()
         register_all(registry)
         assert registry.register.call_count >= 70
 
     def test_new_actions_registered(self, mock_maya):
         from dcc_mcp_maya.actions import register_all
+
         registry = MagicMock()
         register_all(registry)
         names = {call[0][0] for call in registry.register.call_args_list}
-        for action in ("list_history", "delete_history", "apply_symmetry",
-                       "set_joint_limit", "create_expression", "list_expressions",
-                       "delete_expression"):
+        for action in (
+            "list_history",
+            "delete_history",
+            "apply_symmetry",
+            "set_joint_limit",
+            "create_expression",
+            "list_expressions",
+            "delete_expression",
+        ):
             assert action in names, "{} not registered".format(action)

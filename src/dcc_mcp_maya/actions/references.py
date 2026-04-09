@@ -150,18 +150,14 @@ def remove_reference(
         if cmds.objectType(reference_node) != "reference":
             return error_result(
                 "Not a reference node: {}".format(reference_node),
-                "'{}' is of type '{}', expected 'reference'".format(
-                    reference_node, cmds.objectType(reference_node)
-                ),
+                "'{}' is of type '{}', expected 'reference'".format(reference_node, cmds.objectType(reference_node)),
             ).to_dict()
 
         # Resolve namespace before removal
         namespace_removed = ""
         if remove_namespace:
             try:
-                namespace_removed = cmds.referenceQuery(
-                    reference_node, namespace=True, shortName=True
-                )
+                namespace_removed = cmds.referenceQuery(reference_node, namespace=True, shortName=True)
             except Exception:
                 namespace_removed = ""
 
@@ -184,9 +180,7 @@ def remove_reference(
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:
         logger.exception("remove_reference failed")
-        return error_result(
-            "Failed to remove reference '{}'".format(reference_node), str(exc)
-        ).to_dict()
+        return error_result("Failed to remove reference '{}'".format(reference_node), str(exc)).to_dict()
 
 
 def reload_reference(reference_node: str) -> dict:
@@ -235,9 +229,7 @@ def reload_reference(reference_node: str) -> dict:
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:
         logger.exception("reload_reference failed")
-        return error_result(
-            "Failed to reload reference '{}'".format(reference_node), str(exc)
-        ).to_dict()
+        return error_result("Failed to reload reference '{}'".format(reference_node), str(exc)).to_dict()
 
 
 def unload_reference(reference_node: str) -> dict:
@@ -281,9 +273,7 @@ def unload_reference(reference_node: str) -> dict:
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:
         logger.exception("unload_reference failed")
-        return error_result(
-            "Failed to unload reference '{}'".format(reference_node), str(exc)
-        ).to_dict()
+        return error_result("Failed to unload reference '{}'".format(reference_node), str(exc)).to_dict()
 
 
 def list_namespaces(root_only: bool = False) -> dict:

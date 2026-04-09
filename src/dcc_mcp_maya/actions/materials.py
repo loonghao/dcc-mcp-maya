@@ -5,7 +5,7 @@ from __future__ import annotations
 
 # Import built-in modules
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -227,9 +227,7 @@ def get_shader_assignment(object_name: str) -> dict:
                 # Find surface shader connected to this SG
                 shaders = cmds.listConnections("{}.surfaceShader".format(sg)) or []
                 material = shaders[0] if shaders else ""
-                shading_groups.append(
-                    {"shading_group": sg, "material": material}
-                )
+                shading_groups.append({"shading_group": sg, "material": material})
 
         return success_result(
             "Found {} shading group(s) on '{}'".format(len(shading_groups), object_name),
@@ -241,9 +239,7 @@ def get_shader_assignment(object_name: str) -> dict:
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:
         logger.exception("get_shader_assignment failed")
-        return error_result(
-            "Failed to get shader assignment for '{}'".format(object_name), str(exc)
-        ).to_dict()
+        return error_result("Failed to get shader assignment for '{}'".format(object_name), str(exc)).to_dict()
 
 
 def get_material_connections(material_name: str) -> dict:
@@ -272,13 +268,16 @@ def get_material_connections(material_name: str) -> dict:
             ).to_dict()
 
         # List all source plugs connected into this material
-        raw_connections = cmds.listConnections(
-            material_name,
-            source=True,
-            destination=False,
-            connections=True,
-            plugs=True,
-        ) or []
+        raw_connections = (
+            cmds.listConnections(
+                material_name,
+                source=True,
+                destination=False,
+                connections=True,
+                plugs=True,
+            )
+            or []
+        )
 
         # listConnections with connections=True returns pairs: [dest, src, dest, src, …]
         connections = []
@@ -292,12 +291,14 @@ def get_material_connections(material_name: str) -> dict:
             src_node = src_parts[0]
             src_attr = src_parts[1] if len(src_parts) > 1 else ""
             node_type = cmds.nodeType(src_node) if cmds.objExists(src_node) else "unknown"
-            connections.append({
-                "source_node": src_node,
-                "source_attr": src_attr,
-                "dest_attr": dest_attr,
-                "node_type": node_type,
-            })
+            connections.append(
+                {
+                    "source_node": src_node,
+                    "source_attr": src_attr,
+                    "dest_attr": dest_attr,
+                    "node_type": node_type,
+                }
+            )
             i += 2
 
         return success_result(
@@ -310,9 +311,7 @@ def get_material_connections(material_name: str) -> dict:
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:
         logger.exception("get_material_connections failed")
-        return error_result(
-            "Failed to get connections for material '{}'".format(material_name), str(exc)
-        ).to_dict()
+        return error_result("Failed to get connections for material '{}'".format(material_name), str(exc)).to_dict()
 
 
 def list_shading_groups() -> dict:
@@ -342,12 +341,14 @@ def list_shading_groups() -> dict:
                 member_count = len(members)
             except Exception:
                 member_count = 0
-            result.append({
-                "name": sg,
-                "surface_shader": surface_shader,
-                "shader_type": shader_type,
-                "member_count": member_count,
-            })
+            result.append(
+                {
+                    "name": sg,
+                    "surface_shader": surface_shader,
+                    "shader_type": shader_type,
+                    "member_count": member_count,
+                }
+            )
 
         return success_result(
             "Found {} shading group(s)".format(len(result)),
@@ -396,9 +397,7 @@ def reset_to_default_material(object_name: str) -> dict:
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:
         logger.exception("reset_to_default_material failed")
-        return error_result(
-            "Failed to reset material for '{}'".format(object_name), str(exc)
-        ).to_dict()
+        return error_result("Failed to reset material for '{}'".format(object_name), str(exc)).to_dict()
 
 
 _ACTIONS = [
@@ -406,8 +405,28 @@ _ACTIONS = [
     ("assign_material", "Assign a material to objects", "material", ["material", "assign"]),
     ("set_material_attribute", "Set an attribute on a material", "material", ["material", "attribute"]),
     ("list_materials", "List all materials in the scene", "material", ["material", "list", "query"]),
-    ("get_shader_assignment", "Query which shader is assigned to an object", "material", ["shader", "material", "query", "assignment"]),
-    ("reset_to_default_material", "Reset an object to the default lambert1 material", "material", ["material", "reset", "default", "lambert"]),
-    ("get_material_connections", "List all nodes connected to a material", "material", ["material", "connections", "network", "query"]),
-    ("list_shading_groups", "List all shading engine nodes in the scene", "material", ["shadingengine", "list", "query", "material"]),
+    (
+        "get_shader_assignment",
+        "Query which shader is assigned to an object",
+        "material",
+        ["shader", "material", "query", "assignment"],
+    ),
+    (
+        "reset_to_default_material",
+        "Reset an object to the default lambert1 material",
+        "material",
+        ["material", "reset", "default", "lambert"],
+    ),
+    (
+        "get_material_connections",
+        "List all nodes connected to a material",
+        "material",
+        ["material", "connections", "network", "query"],
+    ),
+    (
+        "list_shading_groups",
+        "List all shading engine nodes in the scene",
+        "material",
+        ["shadingengine", "list", "query", "material"],
+    ),
 ]

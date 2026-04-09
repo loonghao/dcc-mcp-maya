@@ -64,41 +64,6 @@ _CORE_MODULES = [
 # ---------------------------------------------------------------------------
 
 # ── core ──────────────────────────────────────────────────────────────────────
-from dcc_mcp_maya.actions.primitives import (  # noqa: E402
-    create_cube,
-    create_cylinder,
-    create_plane,
-    create_sphere,
-    delete_objects,
-    get_transform,
-    rename_object,
-    set_transform,
-)
-from dcc_mcp_maya.actions.scene import (  # noqa: E402
-    center_pivot,
-    create_locator,
-    duplicate_object,
-    export_scene,
-    freeze_transforms,
-    get_bounding_box,
-    get_scene_info,
-    get_selection,
-    get_session_info,
-    group_objects,
-    list_cameras,
-    list_objects,
-    lock_object,
-    new_scene,
-    open_scene,
-    parent_object,
-    save_scene,
-    select_by_type,
-    set_frame_rate,
-    set_selection,
-    set_visibility,
-)
-from dcc_mcp_maya.actions.scripting import execute_mel, execute_python  # noqa: E402
-
 # ── extended — re-exported for ``from dcc_mcp_maya.actions import <name>`` ───
 from dcc_mcp_maya.actions.animation import (  # noqa: E402
     bake_constraints,
@@ -209,6 +174,16 @@ from dcc_mcp_maya.actions.node_graph import (  # noqa: E402
     smooth_mesh,
     transfer_attributes,
 )
+from dcc_mcp_maya.actions.primitives import (  # noqa: E402
+    create_cube,
+    create_cylinder,
+    create_plane,
+    create_sphere,
+    delete_objects,
+    get_transform,
+    rename_object,
+    set_transform,
+)
 from dcc_mcp_maya.actions.references import (  # noqa: E402
     create_reference,
     list_namespaces,
@@ -246,6 +221,29 @@ from dcc_mcp_maya.actions.rigging import (  # noqa: E402
     set_joint_orient,
     skin_cluster_bind,
 )
+from dcc_mcp_maya.actions.scene import (  # noqa: E402
+    center_pivot,
+    create_locator,
+    duplicate_object,
+    export_scene,
+    freeze_transforms,
+    get_bounding_box,
+    get_scene_info,
+    get_selection,
+    get_session_info,
+    group_objects,
+    list_cameras,
+    list_objects,
+    lock_object,
+    new_scene,
+    open_scene,
+    parent_object,
+    save_scene,
+    select_by_type,
+    set_frame_rate,
+    set_selection,
+    set_visibility,
+)
 from dcc_mcp_maya.actions.scene_utils import (  # noqa: E402
     align_objects,
     create_annotation,
@@ -254,6 +252,7 @@ from dcc_mcp_maya.actions.scene_utils import (  # noqa: E402
     set_shading_mode,
     toggle_gpu_override,
 )
+from dcc_mcp_maya.actions.scripting import execute_mel, execute_python  # noqa: E402
 from dcc_mcp_maya.actions.sets import (  # noqa: E402
     add_to_set,
     create_set,

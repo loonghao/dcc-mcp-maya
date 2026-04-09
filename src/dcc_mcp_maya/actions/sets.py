@@ -94,9 +94,7 @@ def add_to_set(
         if cmds.objectType(set_name) != "objectSet":
             return error_result(
                 "Not an object set: {}".format(set_name),
-                "'{}' is of type '{}', expected 'objectSet'".format(
-                    set_name, cmds.objectType(set_name)
-                ),
+                "'{}' is of type '{}', expected 'objectSet'".format(set_name, cmds.objectType(set_name)),
             ).to_dict()
 
         missing = [obj for obj in objects if not cmds.objExists(obj)]
@@ -151,9 +149,7 @@ def remove_from_set(
         if cmds.objectType(set_name) != "objectSet":
             return error_result(
                 "Not an object set: {}".format(set_name),
-                "'{}' is of type '{}', expected 'objectSet'".format(
-                    set_name, cmds.objectType(set_name)
-                ),
+                "'{}' is of type '{}', expected 'objectSet'".format(set_name, cmds.objectType(set_name)),
             ).to_dict()
 
         # Only attempt to remove objects that actually exist
@@ -178,9 +174,7 @@ def remove_from_set(
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:
         logger.exception("remove_from_set failed")
-        return error_result(
-            "Failed to remove objects from set '{}'".format(set_name), str(exc)
-        ).to_dict()
+        return error_result("Failed to remove objects from set '{}'".format(set_name), str(exc)).to_dict()
 
 
 def list_sets(include_internal: bool = False) -> dict:

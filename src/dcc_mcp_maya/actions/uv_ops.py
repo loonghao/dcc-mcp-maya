@@ -5,7 +5,7 @@ from __future__ import annotations
 
 # Import built-in modules
 import logging
-from typing import Dict, List, Optional
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -43,21 +43,13 @@ def get_uv_info(object_name: str, uv_set: Optional[str] = None) -> dict:
 
         if uv_set:
             if uv_set not in uv_sets:
-                return error_result(
-                    "UV set '{}' not found on '{}'".format(uv_set, object_name)
-                ).to_dict()
-            u_coords = cmds.polyEditUV(
-                "{}.map[*]".format(object_name), query=True, uValue=True
-            ) or []
-            v_coords = cmds.polyEditUV(
-                "{}.map[*]".format(object_name), query=True, vValue=True
-            ) or []
+                return error_result("UV set '{}' not found on '{}'".format(uv_set, object_name)).to_dict()
+            u_coords = cmds.polyEditUV("{}.map[*]".format(object_name), query=True, uValue=True) or []
+            _ = cmds.polyEditUV("{}.map[*]".format(object_name), query=True, vValue=True) or []
             result_kwargs["uv_count"] = len(u_coords)
             result_kwargs["queried_uv_set"] = uv_set
 
-        return success_result(
-            "UV info for '{}'".format(object_name), **result_kwargs
-        ).to_dict()
+        return success_result("UV info for '{}'".format(object_name), **result_kwargs).to_dict()
     except ImportError:
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:
@@ -86,15 +78,11 @@ def create_uv_set(object_name: str, uv_set_name: str, copy_from: Optional[str] =
 
         existing = cmds.polyUVSet(object_name, query=True, allUVSets=True) or []
         if uv_set_name in existing:
-            return error_result(
-                "UV set '{}' already exists on '{}'".format(uv_set_name, object_name)
-            ).to_dict()
+            return error_result("UV set '{}' already exists on '{}'".format(uv_set_name, object_name)).to_dict()
 
         if copy_from:
             if copy_from not in existing:
-                return error_result(
-                    "Source UV set '{}' not found on '{}'".format(copy_from, object_name)
-                ).to_dict()
+                return error_result("Source UV set '{}' not found on '{}'".format(copy_from, object_name)).to_dict()
             cmds.polyUVSet(object_name, copy=True, uvSet=copy_from, newUVSet=uv_set_name)
         else:
             cmds.polyUVSet(object_name, create=True, uvSet=uv_set_name)
@@ -132,15 +120,11 @@ def delete_uv_set(object_name: str, uv_set_name: str) -> dict:
 
         existing = cmds.polyUVSet(object_name, query=True, allUVSets=True) or []
         if uv_set_name not in existing:
-            return error_result(
-                "UV set '{}' not found on '{}'".format(uv_set_name, object_name)
-            ).to_dict()
+            return error_result("UV set '{}' not found on '{}'".format(uv_set_name, object_name)).to_dict()
 
         # Protect the only remaining UV set
         if len(existing) <= 1:
-            return error_result(
-                "Cannot delete the only UV set on '{}'".format(object_name)
-            ).to_dict()
+            return error_result("Cannot delete the only UV set on '{}'".format(object_name)).to_dict()
 
         cmds.polyUVSet(object_name, delete=True, uvSet=uv_set_name)
 
@@ -218,9 +202,7 @@ def project_uvs(
             )
 
         return success_result(
-            "Applied {} UV projection to '{}' (axis={})".format(
-                projection_type, object_name, axis
-            ),
+            "Applied {} UV projection to '{}' (axis={})".format(projection_type, object_name, axis),
             object_name=object_name,
             projection_type=projection_type,
             axis=axis,
@@ -314,9 +296,7 @@ def get_uv_shell_info(object_name: str, uv_set: Optional[str] = None) -> dict:
         if uv_set:
             existing = cmds.polyUVSet(object_name, query=True, allUVSets=True) or []
             if uv_set not in existing:
-                return error_result(
-                    "UV set '{}' not found on '{}'".format(uv_set, object_name)
-                ).to_dict()
+                return error_result("UV set '{}' not found on '{}'".format(uv_set, object_name)).to_dict()
             cmds.polyUVSet(object_name, currentUVSet=True, uvSet=uv_set)
 
         active_set = cmds.polyUVSet(object_name, query=True, currentUVSet=True)
@@ -332,12 +312,8 @@ def get_uv_shell_info(object_name: str, uv_set: Optional[str] = None) -> dict:
             shell_map.setdefault(int(sid), []).append(i)
 
         # Query all U and V coordinates
-        u_vals = cmds.polyEditUV(
-            "{}.map[*]".format(object_name), query=True, uValue=True
-        ) or []
-        v_vals = cmds.polyEditUV(
-            "{}.map[*]".format(object_name), query=True, vValue=True
-        ) or []
+        u_vals = cmds.polyEditUV("{}.map[*]".format(object_name), query=True, uValue=True) or []
+        v_vals = cmds.polyEditUV("{}.map[*]".format(object_name), query=True, vValue=True) or []
 
         shells = []
         for sid in sorted(shell_map.keys()):
@@ -477,9 +453,7 @@ def normalize_uvs(
         )
 
         return success_result(
-            "Normalized UVs on '{}' (layout_u={}, layout_v={})".format(
-                object_name, layout_u, layout_v
-            ),
+            "Normalized UVs on '{}' (layout_u={}, layout_v={})".format(object_name, layout_u, layout_v),
             object_name=object_name,
             layout_u=layout_u,
             layout_v=layout_v,
@@ -498,7 +472,17 @@ _ACTIONS = [
     ("delete_uv_set", "Delete a UV set from a polygon mesh", "geometry", ["uv", "delete", "uvset", "mesh"]),
     ("project_uvs", "Apply a UV projection to a polygon mesh", "geometry", ["uv", "projection", "planar", "mesh"]),
     ("copy_uvs", "Copy UV layout from one mesh to another", "geometry", ["uv", "copy", "transfer", "mesh"]),
-    ("get_uv_shell_info", "Get UV shell count and bounding boxes for a polygon mesh", "geometry", ["uv", "shell", "query", "mesh"]),
+    (
+        "get_uv_shell_info",
+        "Get UV shell count and bounding boxes for a polygon mesh",
+        "geometry",
+        ["uv", "shell", "query", "mesh"],
+    ),
     ("unfold_uvs", "Unfold UV layout on a polygon mesh", "geometry", ["uv", "unfold", "layout", "mesh"]),
-    ("normalize_uvs", "Normalize UV coordinates to fit within the 0-1 UV tile", "geometry", ["uv", "normalize", "layout", "mesh"]),
+    (
+        "normalize_uvs",
+        "Normalize UV coordinates to fit within the 0-1 UV tile",
+        "geometry",
+        ["uv", "normalize", "layout", "mesh"],
+    ),
 ]

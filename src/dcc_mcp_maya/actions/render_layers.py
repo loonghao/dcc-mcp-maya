@@ -106,9 +106,7 @@ def set_render_layer(
         if cmds.objectType(layer_name) != "renderLayer":
             return error_result(
                 "Not a render layer: {}".format(layer_name),
-                "'{}' is of type '{}', expected 'renderLayer'".format(
-                    layer_name, cmds.objectType(layer_name)
-                ),
+                "'{}' is of type '{}', expected 'renderLayer'".format(layer_name, cmds.objectType(layer_name)),
             ).to_dict()
 
         cmds.editRenderLayerMembers(layer_name, object_name, noRecurse=True)
@@ -230,9 +228,7 @@ def delete_render_layer(layer_name: str) -> dict:
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:
         logger.exception("delete_render_layer failed")
-        return error_result(
-            "Failed to delete render layer '{}'".format(layer_name), str(exc)
-        ).to_dict()
+        return error_result("Failed to delete render layer '{}'".format(layer_name), str(exc)).to_dict()
 
 
 def set_render_layer_attribute(
@@ -291,15 +287,23 @@ def set_render_layer_attribute(
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:
         logger.exception("set_render_layer_attribute failed")
-        return error_result(
-            "Failed to set attribute '{}.{}'".format(layer_name, attribute), str(exc)
-        ).to_dict()
+        return error_result("Failed to set attribute '{}.{}'".format(layer_name, attribute), str(exc)).to_dict()
 
 
 _ACTIONS = [
-    ("create_render_layer", "Create a render layer and optionally add objects to it", "render", ["renderlayer", "layer", "create"]),
+    (
+        "create_render_layer",
+        "Create a render layer and optionally add objects to it",
+        "render",
+        ["renderlayer", "layer", "create"],
+    ),
     ("set_render_layer", "Assign an object to an existing render layer", "render", ["renderlayer", "layer", "assign"]),
     ("list_render_layers", "List all render layers in the scene", "render", ["renderlayer", "layer", "list", "query"]),
     ("delete_render_layer", "Delete a render layer from the scene", "render", ["renderlayer", "layer", "delete"]),
-    ("set_render_layer_attribute", "Set an attribute override on a render layer", "render", ["renderlayer", "attribute", "override"]),
+    (
+        "set_render_layer_attribute",
+        "Set an attribute override on a render layer",
+        "render",
+        ["renderlayer", "attribute", "override"],
+    ),
 ]

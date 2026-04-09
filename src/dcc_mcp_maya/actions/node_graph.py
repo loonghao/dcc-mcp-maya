@@ -9,7 +9,7 @@ from __future__ import annotations
 
 # Import built-in modules
 import logging
-from typing import List, Optional
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -160,13 +160,16 @@ def list_connections(
                 "The attribute '{}' does not exist on '{}'".format(attribute, object_name),
             ).to_dict()
 
-        connections = cmds.listConnections(
-            query_target,
-            source=incoming,
-            destination=outgoing,
-            plugs=True,
-            connections=True,
-        ) or []
+        connections = (
+            cmds.listConnections(
+                query_target,
+                source=incoming,
+                destination=outgoing,
+                plugs=True,
+                connections=True,
+            )
+            or []
+        )
 
         # listConnections returns alternating pairs [src, dst, src, dst, ...]
         # Flatten into a list of connection dicts
@@ -357,11 +360,7 @@ def list_history(
         }
         history_nodes = cmds.listHistory(object_name, **kwargs) or []
 
-        history = [
-            {"name": node, "type": cmds.objectType(node)}
-            for node in history_nodes
-            if node != object_name
-        ]
+        history = [{"name": node, "type": cmds.objectType(node)} for node in history_nodes if node != object_name]
 
         return success_result(
             "Found {} history node(s) for '{}'".format(len(history), object_name),
@@ -470,7 +469,9 @@ def apply_symmetry(
             )
 
         return success_result(
-            "Applied {} symmetry on '{}' ({} space)".format(axis_lower, object_name, "world" if world_space else "object"),
+            "Applied {} symmetry on '{}' ({} space)".format(
+                axis_lower, object_name, "world" if world_space else "object"
+            ),
             object_name=object_name,
             axis=axis_lower,
             world_space=world_space,
@@ -535,9 +536,7 @@ def transfer_attributes(
         if sample_space not in _VALID_SPACES:
             return error_result(
                 "Invalid sample_space: {}".format(sample_space),
-                "sample_space must be one of {} (0=World, 1=Local, 4=UV, 5=Component)".format(
-                    _VALID_SPACES
-                ),
+                "sample_space must be one of {} (0=World, 1=Local, 4=UV, 5=Component)".format(_VALID_SPACES),
             ).to_dict()
 
         result = cmds.transferAttributes(
@@ -573,12 +572,22 @@ def transfer_attributes(
 
 _ACTIONS = [
     ("connect_attr", "Connect two Maya node attributes", "utility", ["attribute", "connect", "nodegraph"]),
-    ("disconnect_attr", "Disconnect two connected Maya attributes", "utility", ["attribute", "disconnect", "nodegraph"]),
+    (
+        "disconnect_attr",
+        "Disconnect two connected Maya attributes",
+        "utility",
+        ["attribute", "disconnect", "nodegraph"],
+    ),
     ("list_connections", "List attribute connections on a Maya node", "utility", ["attribute", "connections", "query"]),
     ("get_dag_path", "Get the full DAG path of a Maya node", "utility", ["dag", "path", "query"]),
     ("smooth_mesh", "Apply smooth mesh preview or polySmooth subdivision", "geometry", ["smooth", "subdivide", "mesh"]),
     ("list_history", "List construction history nodes for an object", "utility", ["history", "nodes", "query"]),
     ("delete_history", "Delete construction history on an object", "utility", ["history", "delete", "clean"]),
     ("apply_symmetry", "Apply mesh symmetry on a polygon object", "geometry", ["symmetry", "mirror", "mesh"]),
-    ("transfer_attributes", "Transfer UVs, normals or vertex colors between meshes", "geometry", ["transfer", "uv", "normals", "mesh"]),
+    (
+        "transfer_attributes",
+        "Transfer UVs, normals or vertex colors between meshes",
+        "geometry",
+        ["transfer", "uv", "normals", "mesh"],
+    ),
 ]

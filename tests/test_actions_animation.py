@@ -44,6 +44,7 @@ def _no_maya():
 # set_keyframe
 # ---------------------------------------------------------------------------
 
+
 class TestSetKeyframe:
     def test_set_keyframe_default(self, mock_maya):
         _reload()
@@ -101,6 +102,7 @@ class TestSetKeyframe:
 # ---------------------------------------------------------------------------
 # get_keyframes
 # ---------------------------------------------------------------------------
+
 
 class TestGetKeyframes:
     def test_get_keyframes_all(self, mock_maya):
@@ -161,6 +163,7 @@ class TestGetKeyframes:
 # set_timeline
 # ---------------------------------------------------------------------------
 
+
 class TestSetTimeline:
     def test_set_timeline_default(self, mock_maya):
         _reload()
@@ -178,8 +181,10 @@ class TestSetTimeline:
         result = set_timeline(start_frame=0.0, end_frame=240.0, min_frame=-10.0, max_frame=250.0)
         assert result["success"] is True
         mock_maya.playbackOptions.assert_called_with(
-            minTime=0.0, maxTime=240.0,
-            animationStartTime=-10.0, animationEndTime=250.0,
+            minTime=0.0,
+            maxTime=240.0,
+            animationStartTime=-10.0,
+            animationEndTime=250.0,
         )
 
     def test_set_timeline_defaults_min_max(self, mock_maya):
@@ -213,6 +218,7 @@ class TestSetTimeline:
 # ---------------------------------------------------------------------------
 # get/set current time
 # ---------------------------------------------------------------------------
+
 
 class TestCurrentTime:
     def test_get_current_time(self, mock_maya):

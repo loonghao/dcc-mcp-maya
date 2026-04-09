@@ -13,7 +13,6 @@ from __future__ import annotations
 
 # Import built-in modules
 import logging
-from typing import List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -81,9 +80,7 @@ def set_namespace(
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:
         logger.exception("set_namespace failed")
-        return error_result(
-            "Failed to set namespace for '{}'".format(object_name), str(exc)
-        ).to_dict()
+        return error_result("Failed to set namespace for '{}'".format(object_name), str(exc)).to_dict()
 
 
 def rename_namespace(
@@ -109,9 +106,7 @@ def rename_namespace(
         new_ns = new_name.strip(":")
 
         if not old_ns:
-            return error_result(
-                "Cannot rename root namespace", "old_name must not be empty or ':'"
-            ).to_dict()
+            return error_result("Cannot rename root namespace", "old_name must not be empty or ':'").to_dict()
 
         if old_ns in _PROTECTED_NS:
             return error_result(
@@ -142,9 +137,7 @@ def rename_namespace(
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:
         logger.exception("rename_namespace failed")
-        return error_result(
-            "Failed to rename namespace '{}' to '{}'".format(old_name, new_name), str(exc)
-        ).to_dict()
+        return error_result("Failed to rename namespace '{}' to '{}'".format(old_name, new_name), str(exc)).to_dict()
 
 
 def delete_namespace(
@@ -174,9 +167,7 @@ def delete_namespace(
         ns = namespace.strip(":")
 
         if not ns:
-            return error_result(
-                "Cannot delete root namespace", "namespace must not be empty or ':'"
-            ).to_dict()
+            return error_result("Cannot delete root namespace", "namespace must not be empty or ':'").to_dict()
 
         if ns in _PROTECTED_NS:
             return error_result(
@@ -204,13 +195,16 @@ def delete_namespace(
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:
         logger.exception("delete_namespace failed")
-        return error_result(
-            "Failed to delete namespace '{}'".format(namespace), str(exc)
-        ).to_dict()
+        return error_result("Failed to delete namespace '{}'".format(namespace), str(exc)).to_dict()
 
 
 _ACTIONS = [
     ("set_namespace", "Move a Maya object into a namespace", "utility", ["namespace", "move", "rename"]),
     ("rename_namespace", "Rename an existing Maya namespace", "utility", ["namespace", "rename"]),
-    ("delete_namespace", "Delete a Maya namespace, optionally merging contents to root", "utility", ["namespace", "delete", "remove"]),
+    (
+        "delete_namespace",
+        "Delete a Maya namespace, optionally merging contents to root",
+        "utility",
+        ["namespace", "delete", "remove"],
+    ),
 ]

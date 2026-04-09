@@ -8,16 +8,15 @@ from __future__ import annotations
 
 # Import built-in modules
 import sys
-from typing import Any
 from unittest.mock import MagicMock, patch
 
 # Import third-party modules
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Shared Maya mock fixture
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture(autouse=True)
 def mock_maya(monkeypatch):
@@ -38,6 +37,7 @@ def mock_maya(monkeypatch):
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _ok(result: dict) -> bool:
     return result.get("success") is True
 
@@ -54,11 +54,13 @@ def _ctx(result: dict) -> dict:
 # TestAddAttribute
 # ===========================================================================
 
+
 class TestAddAttribute:
     def test_add_double_attribute_happy(self, mock_maya):
         mock_maya.objExists.side_effect = lambda x: x == "pCube1"
 
         from dcc_mcp_maya.actions.node_attrs import add_attribute
+
         result = add_attribute("pCube1", "myWeight", attr_type="double")
 
         assert _ok(result)
@@ -71,6 +73,7 @@ class TestAddAttribute:
         mock_maya.objExists.side_effect = lambda x: x == "pCube1"
 
         from dcc_mcp_maya.actions.node_attrs import add_attribute
+
         result = add_attribute("pCube1", "myLabel", attr_type="string")
 
         assert _ok(result)
@@ -82,6 +85,7 @@ class TestAddAttribute:
         mock_maya.objExists.side_effect = lambda x: x == "pCube1"
 
         from dcc_mcp_maya.actions.node_attrs import add_attribute
+
         result = add_attribute("pCube1", "enabled", attr_type="bool", default_value=True)
 
         assert _ok(result)
@@ -92,6 +96,7 @@ class TestAddAttribute:
         mock_maya.objExists.side_effect = lambda x: x == "pCube1"
 
         from dcc_mcp_maya.actions.node_attrs import add_attribute
+
         result = add_attribute("pCube1", "myVec", attr_type="float3")
 
         assert _ok(result)
@@ -102,6 +107,7 @@ class TestAddAttribute:
         mock_maya.objExists.return_value = False
 
         from dcc_mcp_maya.actions.node_attrs import add_attribute
+
         result = add_attribute("ghost", "myAttr")
 
         assert _fail(result)
@@ -110,6 +116,7 @@ class TestAddAttribute:
         mock_maya.objExists.side_effect = lambda x: True  # both node and attr exist
 
         from dcc_mcp_maya.actions.node_attrs import add_attribute
+
         result = add_attribute("pCube1", "myAttr")
 
         assert _fail(result)
@@ -119,6 +126,7 @@ class TestAddAttribute:
         mock_maya.objExists.side_effect = lambda x: x == "pCube1"
 
         from dcc_mcp_maya.actions.node_attrs import add_attribute
+
         result = add_attribute("pCube1", "myAttr", attr_type="matrix99")
 
         assert _fail(result)
@@ -129,6 +137,7 @@ class TestAddAttribute:
         mock_maya.addAttr.side_effect = RuntimeError("addAttr failed")
 
         from dcc_mcp_maya.actions.node_attrs import add_attribute
+
         result = add_attribute("pCube1", "myAttr")
 
         assert _fail(result)
@@ -137,7 +146,9 @@ class TestAddAttribute:
         monkeypatch.setitem(sys.modules, "maya.cmds", None)
         # Force ImportError path
         import importlib
+
         import dcc_mcp_maya.actions.node_attrs as mod
+
         importlib.reload(mod)
 
         with patch.dict(sys.modules, {"maya.cmds": None}):
@@ -151,12 +162,14 @@ class TestAddAttribute:
 # TestDeleteAttribute
 # ===========================================================================
 
+
 class TestDeleteAttribute:
     def test_delete_custom_attribute_happy(self, mock_maya):
         mock_maya.objExists.return_value = True
         mock_maya.listAttr.return_value = ["myWeight", "myLabel"]
 
         from dcc_mcp_maya.actions.node_attrs import delete_attribute
+
         result = delete_attribute("pCube1", "myWeight")
 
         assert _ok(result)
@@ -166,6 +179,7 @@ class TestDeleteAttribute:
         mock_maya.objExists.side_effect = lambda x: x != "ghost"
 
         from dcc_mcp_maya.actions.node_attrs import delete_attribute
+
         result = delete_attribute("ghost", "myWeight")
 
         assert _fail(result)
@@ -174,6 +188,7 @@ class TestDeleteAttribute:
         mock_maya.objExists.side_effect = lambda x: x == "pCube1"
 
         from dcc_mcp_maya.actions.node_attrs import delete_attribute
+
         result = delete_attribute("pCube1", "nonExistent")
 
         assert _fail(result)
@@ -183,6 +198,7 @@ class TestDeleteAttribute:
         mock_maya.listAttr.return_value = ["myCustom"]  # translateX is NOT in user-defined
 
         from dcc_mcp_maya.actions.node_attrs import delete_attribute
+
         result = delete_attribute("pCube1", "translateX")
 
         assert _fail(result)
@@ -194,6 +210,7 @@ class TestDeleteAttribute:
         mock_maya.deleteAttr.side_effect = RuntimeError("deleteAttr failed")
 
         from dcc_mcp_maya.actions.node_attrs import delete_attribute
+
         result = delete_attribute("pCube1", "myAttr")
 
         assert _fail(result)
@@ -203,21 +220,20 @@ class TestDeleteAttribute:
 # TestListAttributes
 # ===========================================================================
 
+
 class TestListAttributes:
     def _setup_list(self, mock_maya):
         mock_maya.objExists.return_value = True
         mock_maya.listAttr.return_value = ["translateX", "myAttr"]
         mock_maya.getAttr.side_effect = lambda attr, **kw: (
-            True if kw.get("keyable") else
-            False if kw.get("lock") else
-            "double" if kw.get("type") else
-            0.0
+            True if kw.get("keyable") else False if kw.get("lock") else "double" if kw.get("type") else 0.0
         )
 
     def test_list_all_attributes(self, mock_maya):
         self._setup_list(mock_maya)
 
         from dcc_mcp_maya.actions.node_attrs import list_attributes
+
         result = list_attributes("pCube1")
 
         assert _ok(result)
@@ -227,13 +243,11 @@ class TestListAttributes:
         mock_maya.objExists.return_value = True
         mock_maya.listAttr.return_value = ["myAttr"]
         mock_maya.getAttr.side_effect = lambda attr, **kw: (
-            True if kw.get("keyable") else
-            False if kw.get("lock") else
-            "double" if kw.get("type") else
-            1.0
+            True if kw.get("keyable") else False if kw.get("lock") else "double" if kw.get("type") else 1.0
         )
 
         from dcc_mcp_maya.actions.node_attrs import list_attributes
+
         result = list_attributes("pCube1", user_defined=True)
 
         assert _ok(result)
@@ -243,6 +257,7 @@ class TestListAttributes:
         mock_maya.objExists.return_value = False
 
         from dcc_mcp_maya.actions.node_attrs import list_attributes
+
         result = list_attributes("ghost")
 
         assert _fail(result)
@@ -252,6 +267,7 @@ class TestListAttributes:
         mock_maya.listAttr.return_value = []
 
         from dcc_mcp_maya.actions.node_attrs import list_attributes
+
         result = list_attributes("pCube1")
 
         assert _ok(result)
@@ -264,6 +280,7 @@ class TestListAttributes:
         mock_maya.objExists.side_effect = lambda x: "badAttr" not in x
 
         from dcc_mcp_maya.actions.node_attrs import list_attributes
+
         result = list_attributes("pCube1")
 
         assert _ok(result)  # gracefully skips missing attr
@@ -273,15 +290,15 @@ class TestListAttributes:
 # TestSetNamespace
 # ===========================================================================
 
+
 class TestSetNamespace:
     def test_set_namespace_happy(self, mock_maya):
         mock_maya.objExists.return_value = True
-        mock_maya.namespace.side_effect = lambda **kw: (
-            False if kw.get("exists") else None
-        )
+        mock_maya.namespace.side_effect = lambda **kw: False if kw.get("exists") else None
         mock_maya.rename.return_value = "myNS:pCube1"
 
         from dcc_mcp_maya.actions.namespaces import set_namespace
+
         result = set_namespace("pCube1", "myNS")
 
         assert _ok(result)
@@ -290,12 +307,11 @@ class TestSetNamespace:
 
     def test_set_namespace_existing_ns(self, mock_maya):
         mock_maya.objExists.return_value = True
-        mock_maya.namespace.side_effect = lambda **kw: (
-            True if kw.get("exists") else None
-        )
+        mock_maya.namespace.side_effect = lambda **kw: True if kw.get("exists") else None
         mock_maya.rename.return_value = "existing:pCube1"
 
         from dcc_mcp_maya.actions.namespaces import set_namespace
+
         result = set_namespace("pCube1", "existing")
 
         assert _ok(result)
@@ -303,11 +319,10 @@ class TestSetNamespace:
 
     def test_set_namespace_create_if_missing_false(self, mock_maya):
         mock_maya.objExists.return_value = True
-        mock_maya.namespace.side_effect = lambda **kw: (
-            False if kw.get("exists") else None
-        )
+        mock_maya.namespace.side_effect = lambda **kw: False if kw.get("exists") else None
 
         from dcc_mcp_maya.actions.namespaces import set_namespace
+
         result = set_namespace("pCube1", "newNS", create_if_missing=False)
 
         assert _fail(result)
@@ -317,6 +332,7 @@ class TestSetNamespace:
         mock_maya.rename.return_value = "pCube1"
 
         from dcc_mcp_maya.actions.namespaces import set_namespace
+
         result = set_namespace("myNS:pCube1", "")
 
         assert _ok(result)
@@ -326,18 +342,18 @@ class TestSetNamespace:
         mock_maya.objExists.return_value = False
 
         from dcc_mcp_maya.actions.namespaces import set_namespace
+
         result = set_namespace("ghost", "myNS")
 
         assert _fail(result)
 
     def test_set_namespace_maya_error(self, mock_maya):
         mock_maya.objExists.return_value = True
-        mock_maya.namespace.side_effect = lambda **kw: (
-            True if kw.get("exists") else None
-        )
+        mock_maya.namespace.side_effect = lambda **kw: True if kw.get("exists") else None
         mock_maya.rename.side_effect = RuntimeError("rename failed")
 
         from dcc_mcp_maya.actions.namespaces import set_namespace
+
         result = set_namespace("pCube1", "myNS")
 
         assert _fail(result)
@@ -347,6 +363,7 @@ class TestSetNamespace:
 # TestRenameNamespace
 # ===========================================================================
 
+
 class TestRenameNamespace:
     def test_rename_namespace_happy(self, mock_maya):
         def ns_side(**kw):
@@ -354,9 +371,11 @@ class TestRenameNamespace:
                 # old exists, new does not
                 return kw["exists"] == ":oldNS"
             return None
+
         mock_maya.namespace.side_effect = ns_side
 
         from dcc_mcp_maya.actions.namespaces import rename_namespace
+
         result = rename_namespace("oldNS", "newNS")
 
         assert _ok(result)
@@ -365,6 +384,7 @@ class TestRenameNamespace:
 
     def test_rename_namespace_protected(self, mock_maya):
         from dcc_mcp_maya.actions.namespaces import rename_namespace
+
         result = rename_namespace("UI", "myUI")
 
         assert _fail(result)
@@ -372,6 +392,7 @@ class TestRenameNamespace:
 
     def test_rename_namespace_empty_old(self, mock_maya):
         from dcc_mcp_maya.actions.namespaces import rename_namespace
+
         result = rename_namespace("", "newNS")
 
         assert _fail(result)
@@ -380,6 +401,7 @@ class TestRenameNamespace:
         mock_maya.namespace.side_effect = lambda **kw: False if kw.get("exists") else None
 
         from dcc_mcp_maya.actions.namespaces import rename_namespace
+
         result = rename_namespace("ghost", "newNS")
 
         assert _fail(result)
@@ -389,6 +411,7 @@ class TestRenameNamespace:
         mock_maya.namespace.side_effect = lambda **kw: True if kw.get("exists") else None
 
         from dcc_mcp_maya.actions.namespaces import rename_namespace
+
         result = rename_namespace("oldNS", "alreadyExists")
 
         assert _fail(result)
@@ -398,9 +421,11 @@ class TestRenameNamespace:
             if kw.get("exists"):
                 return kw["exists"] == ":oldNS"
             raise RuntimeError("namespace cmd failed")
+
         mock_maya.namespace.side_effect = ns_side
 
         from dcc_mcp_maya.actions.namespaces import rename_namespace
+
         result = rename_namespace("oldNS", "newNS")
 
         assert _fail(result)
@@ -410,24 +435,23 @@ class TestRenameNamespace:
 # TestDeleteNamespace
 # ===========================================================================
 
+
 class TestDeleteNamespace:
     def test_delete_namespace_happy(self, mock_maya):
-        mock_maya.namespace.side_effect = lambda **kw: (
-            True if kw.get("exists") else None
-        )
+        mock_maya.namespace.side_effect = lambda **kw: True if kw.get("exists") else None
 
         from dcc_mcp_maya.actions.namespaces import delete_namespace
+
         result = delete_namespace("myNS")
 
         assert _ok(result)
         assert _ctx(result)["namespace"] == "myNS"
 
     def test_delete_namespace_merge_false(self, mock_maya):
-        mock_maya.namespace.side_effect = lambda **kw: (
-            True if kw.get("exists") else None
-        )
+        mock_maya.namespace.side_effect = lambda **kw: True if kw.get("exists") else None
 
         from dcc_mcp_maya.actions.namespaces import delete_namespace
+
         result = delete_namespace("myNS", merge_with_root=False)
 
         assert _ok(result)
@@ -436,22 +460,23 @@ class TestDeleteNamespace:
 
     def test_delete_namespace_protected(self, mock_maya):
         from dcc_mcp_maya.actions.namespaces import delete_namespace
+
         result = delete_namespace("shared")
 
         assert _fail(result)
 
     def test_delete_namespace_not_found(self, mock_maya):
-        mock_maya.namespace.side_effect = lambda **kw: (
-            False if kw.get("exists") else None
-        )
+        mock_maya.namespace.side_effect = lambda **kw: False if kw.get("exists") else None
 
         from dcc_mcp_maya.actions.namespaces import delete_namespace
+
         result = delete_namespace("ghost")
 
         assert _fail(result)
 
     def test_delete_namespace_empty_name(self, mock_maya):
         from dcc_mcp_maya.actions.namespaces import delete_namespace
+
         result = delete_namespace("")
 
         assert _fail(result)
@@ -461,9 +486,11 @@ class TestDeleteNamespace:
             if kw.get("exists"):
                 return True
             raise RuntimeError("removeNamespace failed")
+
         mock_maya.namespace.side_effect = ns_side
 
         from dcc_mcp_maya.actions.namespaces import delete_namespace
+
         result = delete_namespace("myNS")
 
         assert _fail(result)
@@ -472,6 +499,7 @@ class TestDeleteNamespace:
 # ===========================================================================
 # TestGetMaterialConnections
 # ===========================================================================
+
 
 class TestGetMaterialConnections:
     def test_get_connections_happy(self, mock_maya):
@@ -482,11 +510,10 @@ class TestGetMaterialConnections:
             "myLambert.normalCamera",
             "bump1.outNormal",
         ]
-        mock_maya.nodeType.side_effect = lambda x: (
-            "file" if x == "file1" else "bump2d"
-        )
+        mock_maya.nodeType.side_effect = lambda x: "file" if x == "file1" else "bump2d"
 
         from dcc_mcp_maya.actions.materials import get_material_connections
+
         result = get_material_connections("myLambert")
 
         assert _ok(result)
@@ -500,6 +527,7 @@ class TestGetMaterialConnections:
         mock_maya.listConnections.return_value = []
 
         from dcc_mcp_maya.actions.materials import get_material_connections
+
         result = get_material_connections("lambert1")
 
         assert _ok(result)
@@ -509,6 +537,7 @@ class TestGetMaterialConnections:
         mock_maya.objExists.return_value = False
 
         from dcc_mcp_maya.actions.materials import get_material_connections
+
         result = get_material_connections("ghost")
 
         assert _fail(result)
@@ -518,6 +547,7 @@ class TestGetMaterialConnections:
         mock_maya.listConnections.side_effect = RuntimeError("listConnections failed")
 
         from dcc_mcp_maya.actions.materials import get_material_connections
+
         result = get_material_connections("myLambert")
 
         assert _fail(result)
@@ -529,6 +559,7 @@ class TestGetMaterialConnections:
         mock_maya.nodeType.return_value = "unknown"
 
         from dcc_mcp_maya.actions.materials import get_material_connections
+
         result = get_material_connections("myMat")
 
         assert _ok(result)
@@ -539,18 +570,18 @@ class TestGetMaterialConnections:
 # TestListShadingGroups
 # ===========================================================================
 
+
 class TestListShadingGroups:
     def test_list_shading_groups_happy(self, mock_maya):
         mock_maya.ls.return_value = ["initialShadingGroup", "myMat_SG"]
         mock_maya.listConnections.side_effect = lambda attr, **kw: (
             ["lambert1"] if "initialShadingGroup" in attr else ["myBlinn"]
         )
-        mock_maya.nodeType.side_effect = lambda x: (
-            "lambert" if x == "lambert1" else "blinn"
-        )
+        mock_maya.nodeType.side_effect = lambda x: "lambert" if x == "lambert1" else "blinn"
         mock_maya.sets.return_value = ["pCube1", "pSphere1"]
 
         from dcc_mcp_maya.actions.materials import list_shading_groups
+
         result = list_shading_groups()
 
         assert _ok(result)
@@ -564,6 +595,7 @@ class TestListShadingGroups:
         mock_maya.ls.return_value = []
 
         from dcc_mcp_maya.actions.materials import list_shading_groups
+
         result = list_shading_groups()
 
         assert _ok(result)
@@ -575,6 +607,7 @@ class TestListShadingGroups:
         mock_maya.sets.return_value = []
 
         from dcc_mcp_maya.actions.materials import list_shading_groups
+
         result = list_shading_groups()
 
         assert _ok(result)
@@ -589,6 +622,7 @@ class TestListShadingGroups:
         mock_maya.sets.side_effect = RuntimeError("sets failed")
 
         from dcc_mcp_maya.actions.materials import list_shading_groups
+
         result = list_shading_groups()
 
         assert _ok(result)
@@ -598,6 +632,7 @@ class TestListShadingGroups:
         mock_maya.ls.side_effect = RuntimeError("ls failed")
 
         from dcc_mcp_maya.actions.materials import list_shading_groups
+
         result = list_shading_groups()
 
         assert _fail(result)
@@ -606,6 +641,7 @@ class TestListShadingGroups:
 # ===========================================================================
 # TestRegisterAllRound11
 # ===========================================================================
+
 
 class TestRegisterAllRound11:
     def test_register_all_includes_new_actions(self):
@@ -627,6 +663,7 @@ class TestRegisterAllRound11:
     def test_register_all_total_actions(self):
         registry = MagicMock()
         from dcc_mcp_maya.actions import register_all
+
         register_all(registry)
         call_count = registry.register.call_count
         assert call_count >= 106, "Expected >= 106 actions, got {}".format(call_count)

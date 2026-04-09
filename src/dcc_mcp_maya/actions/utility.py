@@ -44,9 +44,7 @@ def create_utility_node(
         import maya.cmds as cmds  # noqa: PLC0415
 
         if not node_type or not node_type.strip():
-            return error_result(
-                "Invalid node_type", "node_type must not be empty"
-            ).to_dict()
+            return error_result("Invalid node_type", "node_type must not be empty").to_dict()
 
         node = cmds.shadingNode(node_type, asUtility=True)
 
@@ -62,9 +60,7 @@ def create_utility_node(
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:
         logger.exception("create_utility_node failed")
-        return error_result(
-            "Failed to create utility node of type '{}'".format(node_type), str(exc)
-        ).to_dict()
+        return error_result("Failed to create utility node of type '{}'".format(node_type), str(exc)).to_dict()
 
 
 def get_scene_statistics() -> dict:
@@ -100,8 +96,13 @@ def get_scene_statistics() -> dict:
 
         # Light types present in all supported Maya versions
         light_types = [
-            "pointLight", "directionalLight", "spotLight", "areaLight",
-            "ambientLight", "aiAreaLight", "aiSkyDomeLight",
+            "pointLight",
+            "directionalLight",
+            "spotLight",
+            "areaLight",
+            "ambientLight",
+            "aiAreaLight",
+            "aiSkyDomeLight",
         ]
         lights = []  # type: ignore[var-annotated]
         for lt in light_types:
@@ -124,9 +125,7 @@ def get_scene_statistics() -> dict:
             scene_file = ""
 
         return success_result(
-            "Scene statistics: {} nodes, {} meshes, {} poly verts".format(
-                len(all_nodes), len(meshes), poly_verts
-            ),
+            "Scene statistics: {} nodes, {} meshes, {} poly verts".format(len(all_nodes), len(meshes), poly_verts),
             total_nodes=len(all_nodes),
             transform_count=len(transforms),
             mesh_count=len(meshes),
@@ -145,6 +144,16 @@ def get_scene_statistics() -> dict:
 
 
 _ACTIONS = [
-    ("create_utility_node", "Create a Maya utility or shading node by type", "utility", ["utility", "node", "create", "shading"]),
-    ("get_scene_statistics", "Query polygon counts, node counts and memory usage", "utility", ["statistics", "count", "query", "scene"]),
+    (
+        "create_utility_node",
+        "Create a Maya utility or shading node by type",
+        "utility",
+        ["utility", "node", "create", "shading"],
+    ),
+    (
+        "get_scene_statistics",
+        "Query polygon counts, node counts and memory usage",
+        "utility",
+        ["statistics", "count", "query", "scene"],
+    ),
 ]

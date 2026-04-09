@@ -2,16 +2,15 @@
 
 # Import built-in modules
 import sys
-from typing import Any
 from unittest.mock import MagicMock, patch
 
 # Import third-party modules
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture(autouse=True)
 def mock_maya(monkeypatch):
@@ -43,6 +42,7 @@ def mock_maya(monkeypatch):
 # ---------------------------------------------------------------------------
 # wire_deformer
 # ---------------------------------------------------------------------------
+
 
 class TestWireDeformer:
     def test_basic(self, mock_maya):
@@ -120,6 +120,7 @@ class TestWireDeformer:
 # sculpt_deformer
 # ---------------------------------------------------------------------------
 
+
 class TestSculptDeformer:
     def test_basic_stretch(self, mock_maya):
         from dcc_mcp_maya.actions.deformer_advanced import sculpt_deformer
@@ -192,6 +193,7 @@ class TestSculptDeformer:
 # create_nucleus
 # ---------------------------------------------------------------------------
 
+
 class TestCreateNucleus:
     def test_basic(self, mock_maya):
         from dcc_mcp_maya.actions.dynamics import create_nucleus
@@ -251,6 +253,7 @@ class TestCreateNucleus:
 # ---------------------------------------------------------------------------
 # set_nucleus_attribute
 # ---------------------------------------------------------------------------
+
 
 class TestSetNucleusAttribute:
     def test_scalar_attr(self, mock_maya):
@@ -314,6 +317,7 @@ class TestSetNucleusAttribute:
 # ---------------------------------------------------------------------------
 # create_dynamic_field
 # ---------------------------------------------------------------------------
+
 
 class TestCreateDynamicField:
     def test_gravity_field(self, mock_maya):
@@ -400,6 +404,7 @@ class TestCreateDynamicField:
 # connect_field_to_objects
 # ---------------------------------------------------------------------------
 
+
 class TestConnectFieldToObjects:
     def test_basic(self, mock_maya):
         from dcc_mcp_maya.actions.dynamics import connect_field_to_objects
@@ -449,6 +454,7 @@ class TestConnectFieldToObjects:
 # ---------------------------------------------------------------------------
 # register_all coverage
 # ---------------------------------------------------------------------------
+
 
 class TestRegisterAllRound19:
     def test_new_actions_in_all(self):

@@ -95,6 +95,7 @@ class TestPollCallback:
         server._setup_poll_callback()
         # maya.utils.executeDeferred should have been called
         import maya.utils
+
         assert maya.utils.executeDeferred.called
 
     def test_setup_poll_callback_exception_handled(self):
@@ -103,6 +104,7 @@ class TestPollCallback:
         server = srv_mod.MayaMcpServer(port=0, enable_main_thread_executor=False)
         server._executor = MagicMock()
         import maya.utils
+
         maya.utils.executeDeferred.side_effect = RuntimeError("no event loop")
         server._setup_poll_callback()  # should not raise
 
@@ -125,7 +127,7 @@ class TestServerStopEdgeCases:
         """mcp_url property returns URL when running."""
         srv_mod = _import_server()
         server = srv_mod.MayaMcpServer(port=0, enable_main_thread_executor=False)
-        handle = server.start()
+        handle = server.start()  # noqa: F841
         assert server.mcp_url is not None
         assert "127.0.0.1" in server.mcp_url
         server.stop()

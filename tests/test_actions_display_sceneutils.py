@@ -10,7 +10,6 @@ from unittest.mock import MagicMock, patch
 # Import third-party modules
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Shared Maya mock fixture
 # ---------------------------------------------------------------------------
@@ -112,7 +111,9 @@ class TestCreateDisplayLayer:
     def test_create_layer_import_error(self, monkeypatch):
         monkeypatch.setitem(sys.modules, "maya.cmds", None)
         import importlib
+
         import dcc_mcp_maya.actions.display as mod
+
         importlib.reload(mod)
         # Re-patch after reload
         mock_core = MagicMock()
@@ -127,6 +128,7 @@ class TestCreateDisplayLayer:
 
         with patch.dict(sys.modules, {"maya.cmds": None}):
             from dcc_mcp_maya.actions.display import create_display_layer
+
             result = create_display_layer(name="layer")
             assert result["success"] is False
 
@@ -344,13 +346,14 @@ class TestSetPivot:
 class TestAlignObjects:
     def _bb(self, center_x=0.0, center_y=0.0, center_z=0.0):
         """Return a bounding box [xmin, ymin, zmin, xmax, ymax, zmax]."""
-        return [center_x - 0.5, center_y - 0.5, center_z - 0.5,
-                center_x + 0.5, center_y + 0.5, center_z + 0.5]
+        return [center_x - 0.5, center_y - 0.5, center_z - 0.5, center_x + 0.5, center_y + 0.5, center_z + 0.5]
 
     def test_align_center_x(self, mock_maya):
         mock_maya.exactWorldBoundingBox.side_effect = [
-            self._bb(0.0), self._bb(5.0),  # combined query
-            self._bb(0.0), self._bb(5.0),  # per-object
+            self._bb(0.0),
+            self._bb(5.0),  # combined query
+            self._bb(0.0),
+            self._bb(5.0),  # per-object
         ]
         mock_maya.getAttr.return_value = 0.0
         from dcc_mcp_maya.actions.scene_utils import align_objects
@@ -362,8 +365,10 @@ class TestAlignObjects:
 
     def test_align_min_y(self, mock_maya):
         mock_maya.exactWorldBoundingBox.side_effect = [
-            self._bb(0, 0, 0), self._bb(0, 3, 0),
-            self._bb(0, 0, 0), self._bb(0, 3, 0),
+            self._bb(0, 0, 0),
+            self._bb(0, 3, 0),
+            self._bb(0, 0, 0),
+            self._bb(0, 3, 0),
         ]
         mock_maya.getAttr.return_value = 0.0
         from dcc_mcp_maya.actions.scene_utils import align_objects
@@ -373,8 +378,10 @@ class TestAlignObjects:
 
     def test_align_max_z(self, mock_maya):
         mock_maya.exactWorldBoundingBox.side_effect = [
-            self._bb(0, 0, 0), self._bb(0, 0, 4),
-            self._bb(0, 0, 0), self._bb(0, 0, 4),
+            self._bb(0, 0, 0),
+            self._bb(0, 0, 4),
+            self._bb(0, 0, 0),
+            self._bb(0, 0, 4),
         ]
         mock_maya.getAttr.return_value = 0.0
         from dcc_mcp_maya.actions.scene_utils import align_objects
@@ -385,7 +392,8 @@ class TestAlignObjects:
     def test_align_with_reference(self, mock_maya):
         mock_maya.exactWorldBoundingBox.side_effect = [
             self._bb(10.0),  # reference bb
-            self._bb(0.0), self._bb(5.0),  # per-object
+            self._bb(0.0),
+            self._bb(5.0),  # per-object
         ]
         mock_maya.getAttr.return_value = 0.0
         from dcc_mcp_maya.actions.scene_utils import align_objects
@@ -547,9 +555,7 @@ class TestTransferAttributes:
     def test_transfer_colors(self, mock_maya):
         from dcc_mcp_maya.actions.node_graph import transfer_attributes
 
-        result = transfer_attributes(
-            source="mesh1", target="mesh2", transfer_colors=True, transfer_uvs=False
-        )
+        result = transfer_attributes(source="mesh1", target="mesh2", transfer_colors=True, transfer_uvs=False)
         assert result["success"] is True
         assert result["context"]["transfer_colors"] is True
 
@@ -599,6 +605,4 @@ class TestRegisterAllRound8:
         registered = []
         registry.register.side_effect = lambda name, **kw: registered.append(name)
         register_all(registry)
-        assert len(registered) >= 79, "Expected at least 79 registered actions, got {}".format(
-            len(registered)
-        )
+        assert len(registered) >= 79, "Expected at least 79 registered actions, got {}".format(len(registered))

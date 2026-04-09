@@ -115,9 +115,7 @@ def set_display_layer(
         if cmds.objectType(layer_name) != "displayLayer":
             return error_result(
                 "Not a display layer: {}".format(layer_name),
-                "'{}' is of type '{}', expected 'displayLayer'".format(
-                    layer_name, cmds.objectType(layer_name)
-                ),
+                "'{}' is of type '{}', expected 'displayLayer'".format(layer_name, cmds.objectType(layer_name)),
             ).to_dict()
 
         cmds.editDisplayLayerMembers(layer_name, object_name, noRecurse=True)
@@ -131,9 +129,7 @@ def set_display_layer(
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:
         logger.exception("set_display_layer failed")
-        return error_result(
-            "Failed to assign '{}' to layer '{}'".format(object_name, layer_name), str(exc)
-        ).to_dict()
+        return error_result("Failed to assign '{}' to layer '{}'".format(object_name, layer_name), str(exc)).to_dict()
 
 
 def delete_display_layer(
@@ -237,7 +233,12 @@ def list_display_layers() -> dict:
 
 
 _ACTIONS = [
-    ("create_display_layer", "Create a display layer and add objects to it", "utility", ["layer", "display", "visibility"]),
+    (
+        "create_display_layer",
+        "Create a display layer and add objects to it",
+        "utility",
+        ["layer", "display", "visibility"],
+    ),
     ("set_display_layer", "Assign an object to an existing display layer", "utility", ["layer", "display", "assign"]),
     ("delete_display_layer", "Delete a display layer", "utility", ["layer", "display", "delete"]),
     ("list_display_layers", "List all display layers in the scene", "utility", ["layer", "display", "list", "query"]),

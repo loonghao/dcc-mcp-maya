@@ -54,13 +54,15 @@ def get_poly_count(object_name: Optional[str] = None) -> dict:
             total_tris += tris if isinstance(tris, int) else 0
 
             if object_name:
-                per_object.append({
-                    "name": target,
-                    "faces": faces,
-                    "vertices": verts,
-                    "edges": edges,
-                    "triangles": tris,
-                })
+                per_object.append(
+                    {
+                        "name": target,
+                        "faces": faces,
+                        "vertices": verts,
+                        "edges": edges,
+                        "triangles": tris,
+                    }
+                )
 
         label = "Poly count for '{}'".format(object_name) if object_name else "Scene poly count"
         result_kwargs = {
@@ -116,9 +118,7 @@ def apply_subdivision(
             if cmds.objectType(object_name) == "mesh":
                 shapes = [object_name]
             else:
-                return error_result(
-                    "'{}' has no polygon mesh shape".format(object_name)
-                ).to_dict()
+                return error_result("'{}' has no polygon mesh shape".format(object_name)).to_dict()
 
         shape = shapes[0]
 
@@ -295,9 +295,7 @@ def get_mesh_edge_info(
 
         total_edges = cmds.polyEvaluate(object_name, edge=True)
         if not isinstance(total_edges, int) or total_edges == 0:
-            return error_result(
-                "'{}' has no edges — ensure it is a polygon mesh".format(object_name)
-            ).to_dict()
+            return error_result("'{}' has no edges — ensure it is a polygon mesh".format(object_name)).to_dict()
 
         if edge_indices is None:
             indices = list(range(total_edges))
@@ -322,7 +320,7 @@ def get_mesh_edge_info(
                     # Format: EDGE n : v1 v2
                     colon_pos = [i for i, p in enumerate(parts) if p == ":"]
                     if colon_pos:
-                        for p in parts[colon_pos[0] + 1:]:
+                        for p in parts[colon_pos[0] + 1 :]:
                             try:
                                 verts.append(int(p))
                             except ValueError:
@@ -331,20 +329,14 @@ def get_mesh_edge_info(
                 verts = []
 
             try:
-                length_info = cmds.polyInfo(edge_comp, edgeToFace=False) or []
+                _ = cmds.polyInfo(edge_comp, edgeToFace=False) or []
                 # Edge length via arclen approximation
                 length = None
                 if verts and len(verts) >= 2:
-                    v0_pos = cmds.pointPosition(
-                        "{}.vtx[{}]".format(object_name, verts[0]), world=True
-                    )
-                    v1_pos = cmds.pointPosition(
-                        "{}.vtx[{}]".format(object_name, verts[1]), world=True
-                    )
+                    v0_pos = cmds.pointPosition("{}.vtx[{}]".format(object_name, verts[0]), world=True)
+                    v1_pos = cmds.pointPosition("{}.vtx[{}]".format(object_name, verts[1]), world=True)
                     length = (
-                        (v1_pos[0] - v0_pos[0]) ** 2
-                        + (v1_pos[1] - v0_pos[1]) ** 2
-                        + (v1_pos[2] - v0_pos[2]) ** 2
+                        (v1_pos[0] - v0_pos[0]) ** 2 + (v1_pos[1] - v0_pos[1]) ** 2 + (v1_pos[2] - v0_pos[2]) ** 2
                     ) ** 0.5
                     length = round(length, 6)
             except Exception:
@@ -392,9 +384,9 @@ def select_by_material(material_name: str) -> dict:
             ).to_dict()
 
         # Find all shading engines connected to this material
-        shading_engines = cmds.listConnections(
-            material_name, type="shadingEngine", source=False, destination=True
-        ) or []
+        shading_engines = (
+            cmds.listConnections(material_name, type="shadingEngine", source=False, destination=True) or []
+        )
 
         if not shading_engines:
             return success_result(
@@ -485,9 +477,7 @@ def create_proxy_mesh(
         if not shapes:
             obj_type = cmds.objectType(object_name)
             if obj_type != "mesh":
-                return error_result(
-                    "'{}' has no polygon mesh shape".format(object_name)
-                ).to_dict()
+                return error_result("'{}' has no polygon mesh shape".format(object_name)).to_dict()
 
         # Record original face count
         face_count_before = cmds.polyEvaluate(object_name, face=True)
@@ -700,12 +690,7 @@ def extract_faces(
 
         face_components = ["{}.f[{}]".format(object_name, idx) for idx in face_indices]
 
-        cmds.polyChipOff(
-            *face_components,
-            constructionHistory=False,
-            duplicate=keep_original,
-            keepFacesTogether=True
-        )
+        cmds.polyChipOff(*face_components, constructionHistory=False, duplicate=keep_original, keepFacesTogether=True)
 
         extracted = object_name
         if separate:
@@ -812,16 +797,66 @@ def mirror_mesh(
 
 
 _ACTIONS = [
-    ("get_poly_count", "Query polygon statistics for an object or the scene", "geometry", ["polygon", "count", "stats", "query"]),
+    (
+        "get_poly_count",
+        "Query polygon statistics for an object or the scene",
+        "geometry",
+        ["polygon", "count", "stats", "query"],
+    ),
     ("apply_subdivision", "Apply subdivision to a polygon mesh", "geometry", ["subdivision", "smooth", "mesh"]),
-    ("merge_vertices", "Merge coincident vertices on a polygon mesh", "geometry", ["merge", "vertices", "weld", "mesh"]),
+    (
+        "merge_vertices",
+        "Merge coincident vertices on a polygon mesh",
+        "geometry",
+        ["merge", "vertices", "weld", "mesh"],
+    ),
     ("triangulate", "Triangulate all faces of a polygon mesh", "geometry", ["triangulate", "mesh", "faces"]),
-    ("cleanup_mesh", "Clean non-manifold, lamina and degenerate polygons", "geometry", ["cleanup", "nonmanifold", "mesh"]),
-    ("combine_meshes", "Combine multiple polygon meshes into a single mesh via polyUnite", "geometry", ["combine", "unite", "merge", "mesh"]),
-    ("separate_mesh", "Separate a polygon mesh with disconnected shells into individual meshes", "geometry", ["separate", "split", "shell", "mesh"]),
-    ("extract_faces", "Extract specified polygon faces from a mesh into a new mesh", "geometry", ["extract", "faces", "chipoff", "mesh"]),
-    ("mirror_mesh", "Mirror a polygon mesh along a world axis and merge the result", "geometry", ["mirror", "axis", "polyMirrorFace", "mesh"]),
-    ("get_mesh_edge_info", "Query edge length and connected vertices for polygon mesh edges", "geometry", ["edge", "length", "vertices", "query", "mesh"]),
-    ("select_by_material", "Select all objects in the scene that use a given material", "material", ["material", "select", "objects", "query"]),
-    ("create_proxy_mesh", "Create a simplified proxy mesh via polygon reduction", "geometry", ["proxy", "reduction", "polyreduce", "mesh"]),
+    (
+        "cleanup_mesh",
+        "Clean non-manifold, lamina and degenerate polygons",
+        "geometry",
+        ["cleanup", "nonmanifold", "mesh"],
+    ),
+    (
+        "combine_meshes",
+        "Combine multiple polygon meshes into a single mesh via polyUnite",
+        "geometry",
+        ["combine", "unite", "merge", "mesh"],
+    ),
+    (
+        "separate_mesh",
+        "Separate a polygon mesh with disconnected shells into individual meshes",
+        "geometry",
+        ["separate", "split", "shell", "mesh"],
+    ),
+    (
+        "extract_faces",
+        "Extract specified polygon faces from a mesh into a new mesh",
+        "geometry",
+        ["extract", "faces", "chipoff", "mesh"],
+    ),
+    (
+        "mirror_mesh",
+        "Mirror a polygon mesh along a world axis and merge the result",
+        "geometry",
+        ["mirror", "axis", "polyMirrorFace", "mesh"],
+    ),
+    (
+        "get_mesh_edge_info",
+        "Query edge length and connected vertices for polygon mesh edges",
+        "geometry",
+        ["edge", "length", "vertices", "query", "mesh"],
+    ),
+    (
+        "select_by_material",
+        "Select all objects in the scene that use a given material",
+        "material",
+        ["material", "select", "objects", "query"],
+    ),
+    (
+        "create_proxy_mesh",
+        "Create a simplified proxy mesh via polygon reduction",
+        "geometry",
+        ["proxy", "reduction", "polyreduce", "mesh"],
+    ),
 ]

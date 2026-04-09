@@ -64,9 +64,7 @@ def bake_textures(
 
         missing = [obj for obj in objects if not cmds.objExists(obj)]
         if missing:
-            return error_result(
-                "Objects not found: {}".format(", ".join(missing))
-            ).to_dict()
+            return error_result("Objects not found: {}".format(", ".join(missing))).to_dict()
 
         bake_type_map = {
             "diffuse": "diffuse",
@@ -207,16 +205,12 @@ def list_color_spaces() -> dict:
             spaces = []
 
         try:
-            rendering_spaces = (
-                cmds.colorManagementPrefs(query=True, renderingSpaceNames=True) or []
-            )
+            rendering_spaces = cmds.colorManagementPrefs(query=True, renderingSpaceNames=True) or []
         except Exception:
             rendering_spaces = []
 
         try:
-            output_transforms = (
-                cmds.colorManagementPrefs(query=True, outputTransformNames=True) or []
-            )
+            output_transforms = cmds.colorManagementPrefs(query=True, outputTransformNames=True) or []
         except Exception:
             output_transforms = []
 
@@ -241,6 +235,16 @@ def list_color_spaces() -> dict:
 
 _ACTIONS = [
     ("bake_textures", "Bake lighting or texture to a UV map", "render", ["bake", "texture", "uv", "render"]),
-    ("set_color_management", "Configure scene color management (OCIO/Maya native)", "render", ["color", "management", "ocio", "render"]),
-    ("list_color_spaces", "List all available color spaces in Maya's color management", "render", ["color", "space", "ocio", "query"]),
+    (
+        "set_color_management",
+        "Configure scene color management (OCIO/Maya native)",
+        "render",
+        ["color", "management", "ocio", "render"],
+    ),
+    (
+        "list_color_spaces",
+        "List all available color spaces in Maya's color management",
+        "render",
+        ["color", "space", "ocio", "query"],
+    ),
 ]

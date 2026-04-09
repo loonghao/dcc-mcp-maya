@@ -9,15 +9,15 @@ from __future__ import annotations
 
 # Import built-in modules
 import sys
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import MagicMock, patch
 
 # Import third-party modules
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Shared helpers
 # ---------------------------------------------------------------------------
+
 
 def _reload():
     """Remove all dcc_mcp_maya modules so imports pick up fresh mocks."""
@@ -56,6 +56,7 @@ def mock_maya():
 # delete_keyframes
 # ===========================================================================
 
+
 class TestDeleteKeyframes:
     def test_delete_all_keyframes(self, mock_maya):
         _reload()
@@ -72,9 +73,7 @@ class TestDeleteKeyframes:
 
         result = delete_keyframes("pSphere1", start_frame=1.0, end_frame=30.0)
         assert result["success"] is True
-        mock_maya.cutKey.assert_called_once_with(
-            "pSphere1", clear=True, time=(1.0, 30.0)
-        )
+        mock_maya.cutKey.assert_called_once_with("pSphere1", clear=True, time=(1.0, 30.0))
 
     def test_delete_with_start_only(self, mock_maya):
         _reload()
@@ -134,6 +133,7 @@ class TestDeleteKeyframes:
 # ===========================================================================
 # bake_simulation
 # ===========================================================================
+
 
 class TestBakeSimulation:
     def test_bake_named_objects(self, mock_maya):
@@ -209,6 +209,7 @@ class TestBakeSimulation:
 # set_joint_orient
 # ===========================================================================
 
+
 class TestSetJointOrient:
     def test_set_orient_default(self, mock_maya):
         _reload()
@@ -278,6 +279,7 @@ class TestSetJointOrient:
 # ===========================================================================
 # mirror_joints
 # ===========================================================================
+
 
 class TestMirrorJoints:
     def test_mirror_default(self, mock_maya):
@@ -363,6 +365,7 @@ class TestMirrorJoints:
 # create_ik_handle
 # ===========================================================================
 
+
 class TestCreateIkHandle:
     def test_create_ik_default(self, mock_maya):
         _reload()
@@ -441,6 +444,7 @@ class TestCreateIkHandle:
 # ===========================================================================
 # register_all — ensure new actions are present
 # ===========================================================================
+
 
 class TestRegisterAllRound4:
     def test_all_new_actions_in_all(self):

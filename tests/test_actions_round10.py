@@ -15,7 +15,6 @@ from unittest.mock import MagicMock
 # Import third-party modules
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Fixture: mock Maya environment
 # ---------------------------------------------------------------------------
@@ -184,9 +183,7 @@ class TestListNamespaces:
 
         result = list_namespaces(root_only=True)
         assert result["success"] is True
-        mock_maya_env.namespaceInfo.assert_called_once_with(
-            listOnlyNamespaces=True, recurse=False
-        )
+        mock_maya_env.namespaceInfo.assert_called_once_with(listOnlyNamespaces=True, recurse=False)
 
     def test_list_empty_scene(self, mock_maya_env):
         mock_maya_env.namespaceInfo.return_value = []
@@ -267,9 +264,7 @@ class TestDeleteRenderLayer:
 
         delete_render_layer("myLayer")
         # Should have been called to switch current layer
-        mock_maya_env.editRenderLayerGlobals.assert_any_call(
-            currentRenderLayer="defaultRenderLayer"
-        )
+        mock_maya_env.editRenderLayerGlobals.assert_any_call(currentRenderLayer="defaultRenderLayer")
 
     def test_delete_raises(self, mock_maya_env):
         mock_maya_env.objExists.return_value = True
@@ -328,9 +323,7 @@ class TestSetRenderLayerAttribute:
 
         result = set_render_layer_attribute("myLayer", "color", [1.0, 0.0, 0.0])
         assert result["success"] is True
-        mock_maya_env.setAttr.assert_called_once_with(
-            "myLayer.color", 1.0, 0.0, 0.0, type="double3"
-        )
+        mock_maya_env.setAttr.assert_called_once_with("myLayer.color", 1.0, 0.0, 0.0, type="double3")
 
     def test_set_layer_not_found(self, mock_maya_env):
         mock_maya_env.objExists.return_value = False
@@ -378,8 +371,8 @@ class TestGetShaderAssignment:
         mock_maya_env.objExists.return_value = True
         mock_maya_env.listRelatives.return_value = ["|pSphere1|pSphereShape1"]
         mock_maya_env.listConnections.side_effect = [
-            ["blinn1SG"],       # shadingEngine connections
-            ["blinn1"],         # surfaceShader connections
+            ["blinn1SG"],  # shadingEngine connections
+            ["blinn1"],  # surfaceShader connections
         ]
 
         from dcc_mcp_maya.actions.materials import get_shader_assignment
@@ -478,9 +471,7 @@ class TestResetToDefaultMaterial:
         assert result["context"]["object_name"] == "pSphere1"
         assert result["context"]["shading_group"] == "initialShadingGroup"
         assert result["context"]["material"] == "lambert1"
-        mock_maya_env.sets.assert_called_once_with(
-            "pSphere1", edit=True, forceElement="initialShadingGroup"
-        )
+        mock_maya_env.sets.assert_called_once_with("pSphere1", edit=True, forceElement="initialShadingGroup")
 
     def test_reset_object_not_found(self, mock_maya_env):
         mock_maya_env.objExists.return_value = False
@@ -587,21 +578,25 @@ class TestCreateUtilityNode:
 class TestGetSceneStatistics:
     def _setup_mock(self, mock_maya_env):
         """Configure common mock return values."""
-        mock_maya_env.ls.side_effect = lambda **kw: {
-            "type": {
-                "transform": ["pSphere1", "pCube1", "camera1"],
-                "mesh": ["pSphereShape1", "pCubeShape1"],
-                "file": ["file1"],
-                "camera": ["cameraShape1"],
-                "pointLight": ["pointLight1"],
-                "directionalLight": [],
-                "spotLight": [],
-                "areaLight": [],
-                "ambientLight": [],
-                "aiAreaLight": [],
-                "aiSkyDomeLight": [],
-            }.get(kw.get("type"), ["node1", "node2", "node3"])
-        }.get("type", ["node1", "node2", "node3"]) if kw else ["node1", "node2", "node3"]
+        mock_maya_env.ls.side_effect = lambda **kw: (
+            {
+                "type": {
+                    "transform": ["pSphere1", "pCube1", "camera1"],
+                    "mesh": ["pSphereShape1", "pCubeShape1"],
+                    "file": ["file1"],
+                    "camera": ["cameraShape1"],
+                    "pointLight": ["pointLight1"],
+                    "directionalLight": [],
+                    "spotLight": [],
+                    "areaLight": [],
+                    "ambientLight": [],
+                    "aiAreaLight": [],
+                    "aiSkyDomeLight": [],
+                }.get(kw.get("type"), ["node1", "node2", "node3"])
+            }.get("type", ["node1", "node2", "node3"])
+            if kw
+            else ["node1", "node2", "node3"]
+        )
         mock_maya_env.polyEvaluate.side_effect = lambda mesh, **kw: (
             100 if kw.get("vertex") else 50 if kw.get("face") else 0
         )

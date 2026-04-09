@@ -54,10 +54,7 @@ def set_render_settings(
             cmds.setAttr("defaultRenderGlobals.currentRenderer", renderer, type="string")
             applied["renderer"] = renderer
 
-        return success_result(
-            "Render settings applied ({}x{})".format(width, height),
-            **applied
-        ).to_dict()
+        return success_result("Render settings applied ({}x{})".format(width, height), **applied).to_dict()
     except ImportError:
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:
@@ -220,7 +217,7 @@ def export_selection(
 # visibilitySamples, etc.
 _RENDER_QUALITY_PRESETS = {
     "low": {
-        "edgeAntiAliasing": 0,     # Lowest preset
+        "edgeAntiAliasing": 0,  # Lowest preset
         "shadingSamples": 1,
         "maxShadingSamples": 1,
         "visibilitySamples": 1,
@@ -364,6 +361,16 @@ _ACTIONS = [
     ("capture_viewport", "Capture viewport as base64 PNG", "render", ["render", "viewport", "capture"]),
     ("import_file", "Import a file into the scene", "render", ["import", "io", "fbx", "obj"]),
     ("export_selection", "Export selected objects to file", "render", ["export", "io", "fbx", "obj"]),
-    ("set_render_quality", "Apply a render quality preset (low/medium/high) to Maya Software renderer", "render", ["render", "quality", "preset", "settings"]),
-    ("get_scene_render_stats", "Query a summary of the current scene render configuration", "render", ["render", "stats", "query", "settings"]),
+    (
+        "set_render_quality",
+        "Apply a render quality preset (low/medium/high) to Maya Software renderer",
+        "render",
+        ["render", "quality", "preset", "settings"],
+    ),
+    (
+        "get_scene_render_stats",
+        "Query a summary of the current scene render configuration",
+        "render",
+        ["render", "stats", "query", "settings"],
+    ),
 ]

@@ -13,7 +13,7 @@ from __future__ import annotations
 
 # Import built-in modules
 import logging
-from typing import Any, List, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -100,8 +100,7 @@ def add_attribute(
             if max_value is not None:
                 kwargs["maxValue"] = float(max_value)
 
-            cmds.addAttr(object_name, longName=long_name, shortName=sn,
-                         attributeType=attr_type, **kwargs)
+            cmds.addAttr(object_name, longName=long_name, shortName=sn, attributeType=attr_type, **kwargs)
 
         # Make keyable (only applicable to DG attributes, not compound children)
         full_attr = "{}.{}".format(object_name, long_name)
@@ -120,9 +119,7 @@ def add_attribute(
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:
         logger.exception("add_attribute failed")
-        return error_result(
-            "Failed to add attribute '{}.{}'".format(object_name, long_name), str(exc)
-        ).to_dict()
+        return error_result("Failed to add attribute '{}.{}'".format(object_name, long_name), str(exc)).to_dict()
 
 
 def delete_attribute(
@@ -177,9 +174,7 @@ def delete_attribute(
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:
         logger.exception("delete_attribute failed")
-        return error_result(
-            "Failed to delete attribute '{}.{}'".format(object_name, attribute), str(exc)
-        ).to_dict()
+        return error_result("Failed to delete attribute '{}.{}'".format(object_name, attribute), str(exc)).to_dict()
 
 
 def list_attributes(
@@ -251,16 +246,17 @@ def list_attributes(
                 except Exception:
                     value = None
 
-                result.append({
-                    "name": attr_name,
-                    "type": attr_type,
-                    "value": value,
-                    "keyable": is_keyable,
-                    "locked": is_locked,
-                })
+                result.append(
+                    {
+                        "name": attr_name,
+                        "type": attr_type,
+                        "value": value,
+                        "keyable": is_keyable,
+                        "locked": is_locked,
+                    }
+                )
             except Exception:
-                result.append({"name": attr_name, "type": "unknown", "value": None,
-                               "keyable": False, "locked": False})
+                result.append({"name": attr_name, "type": "unknown", "value": None, "keyable": False, "locked": False})
 
         return success_result(
             "Found {} attribute(s) on '{}'".format(len(result), object_name),
@@ -274,13 +270,16 @@ def list_attributes(
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:
         logger.exception("list_attributes failed")
-        return error_result(
-            "Failed to list attributes on '{}'".format(object_name), str(exc)
-        ).to_dict()
+        return error_result("Failed to list attributes on '{}'".format(object_name), str(exc)).to_dict()
 
 
 _ACTIONS = [
     ("add_attribute", "Add a custom attribute to a Maya node", "utility", ["attribute", "custom", "add", "node"]),
-    ("delete_attribute", "Delete a custom attribute from a Maya node", "utility", ["attribute", "custom", "delete", "node"]),
+    (
+        "delete_attribute",
+        "Delete a custom attribute from a Maya node",
+        "utility",
+        ["attribute", "custom", "delete", "node"],
+    ),
     ("list_attributes", "List attributes on a Maya node", "utility", ["attribute", "list", "query", "node"]),
 ]

@@ -10,7 +10,7 @@ from __future__ import annotations
 
 # Import built-in modules
 import logging
-from typing import List, Optional
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -182,9 +182,7 @@ def delete_expression(
         if node_type != "expression":
             return error_result(
                 "Not an expression node: {}".format(expression_name),
-                "'{}' is of type '{}', expected 'expression'".format(
-                    expression_name, node_type
-                ),
+                "'{}' is of type '{}', expected 'expression'".format(expression_name, node_type),
             ).to_dict()
 
         cmds.delete(expression_name)
@@ -197,9 +195,7 @@ def delete_expression(
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:
         logger.exception("delete_expression failed")
-        return error_result(
-            "Failed to delete expression {}".format(expression_name), str(exc)
-        ).to_dict()
+        return error_result("Failed to delete expression {}".format(expression_name), str(exc)).to_dict()
 
 
 _ACTIONS = [

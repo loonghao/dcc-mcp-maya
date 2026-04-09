@@ -5,7 +5,6 @@ from __future__ import annotations
 
 # Import built-in modules
 import base64
-import os
 import sys
 import tempfile
 from unittest.mock import MagicMock, patch
@@ -46,6 +45,7 @@ def _no_maya():
 # set_render_settings
 # ---------------------------------------------------------------------------
 
+
 class TestSetRenderSettings:
     def test_default_resolution(self, mock_maya):
         _reload()
@@ -61,8 +61,10 @@ class TestSetRenderSettings:
         from dcc_mcp_maya.actions.render import set_render_settings
 
         result = set_render_settings(
-            width=1280, height=720,
-            start_frame=1.0, end_frame=100.0,
+            width=1280,
+            height=720,
+            start_frame=1.0,
+            end_frame=100.0,
             renderer="arnold",
         )
         assert result["success"] is True
@@ -92,6 +94,7 @@ class TestSetRenderSettings:
 # ---------------------------------------------------------------------------
 # capture_viewport
 # ---------------------------------------------------------------------------
+
 
 class TestCaptureViewport:
     def _make_fake_png(self, prefix, frame):
@@ -171,6 +174,7 @@ class TestCaptureViewport:
 # import_file
 # ---------------------------------------------------------------------------
 
+
 class TestImportFile:
     def test_import_file_basic(self, mock_maya):
         _reload()
@@ -223,6 +227,7 @@ class TestImportFile:
 # ---------------------------------------------------------------------------
 # export_selection
 # ---------------------------------------------------------------------------
+
 
 class TestExportSelection:
     def test_export_selection_fbx(self, mock_maya):

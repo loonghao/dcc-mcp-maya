@@ -295,9 +295,7 @@ def create_constraint_weighted(
                 cmds.setAttr(full_attr, w)
 
         return success_result(
-            "Created weighted {} constraint on '{}' from {} sources".format(
-                constraint_type, target, len(sources)
-            ),
+            "Created weighted {} constraint on '{}' from {} sources".format(constraint_type, target, len(sources)),
             constraint_name=constraint_name,
             constraint_type=constraint_type,
             sources=sources,
@@ -309,14 +307,22 @@ def create_constraint_weighted(
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:
         logger.exception("create_constraint_weighted failed")
-        return error_result(
-            "Failed to create weighted {} constraint".format(constraint_type), str(exc)
-        ).to_dict()
+        return error_result("Failed to create weighted {} constraint".format(constraint_type), str(exc)).to_dict()
 
 
 _ACTIONS = [
-    ("add_constraint", "Add a Maya constraint (parent/point/orient/scale/aim)", "rigging", ["constraint", "rigging", "parent"]),
+    (
+        "add_constraint",
+        "Add a Maya constraint (parent/point/orient/scale/aim)",
+        "rigging",
+        ["constraint", "rigging", "parent"],
+    ),
     ("remove_constraint", "Remove constraints from a target object", "rigging", ["constraint", "remove", "rigging"]),
     ("list_constraints", "List all constraints applied to a target object", "rigging", ["constraint", "list", "query"]),
-    ("create_constraint_weighted", "Create a weighted multi-source Maya constraint", "rigging", ["constraint", "weighted", "rigging"]),
+    (
+        "create_constraint_weighted",
+        "Create a weighted multi-source Maya constraint",
+        "rigging",
+        ["constraint", "weighted", "rigging"],
+    ),
 ]

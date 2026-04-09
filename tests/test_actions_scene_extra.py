@@ -7,7 +7,6 @@ from __future__ import annotations
 import sys
 from unittest.mock import MagicMock, patch
 
-
 # ---------------------------------------------------------------------------
 # shared fixture helpers
 # ---------------------------------------------------------------------------
@@ -245,9 +244,7 @@ class TestListCameras:
         _reload()
         cmds_mock, mel_mock = _mock_maya()
         cmds_mock.ls.return_value = ["perspShape", "myCameraShape"]
-        cmds_mock.listRelatives.side_effect = lambda shape, **kw: (
-            ["persp"] if shape == "perspShape" else ["myCamera"]
-        )
+        cmds_mock.listRelatives.side_effect = lambda shape, **kw: ["persp"] if shape == "perspShape" else ["myCamera"]
         cmds_mock.getAttr.return_value = 35.0
 
         with _patch_maya(cmds_mock, mel_mock):
@@ -263,9 +260,7 @@ class TestListCameras:
         cmds_mock, mel_mock = _mock_maya()
         # All returned shapes are default cameras → should be filtered out
         cmds_mock.ls.return_value = ["perspShape", "topShape"]
-        cmds_mock.listRelatives.side_effect = lambda shape, **kw: (
-            ["persp"] if shape == "perspShape" else ["top"]
-        )
+        cmds_mock.listRelatives.side_effect = lambda shape, **kw: ["persp"] if shape == "perspShape" else ["top"]
         cmds_mock.getAttr.return_value = 35.0
 
         with _patch_maya(cmds_mock, mel_mock):
