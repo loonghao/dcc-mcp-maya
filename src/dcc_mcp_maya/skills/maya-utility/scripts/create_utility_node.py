@@ -1,4 +1,4 @@
-"""Create any Maya utility or shading node by type."""
+"""Create a Maya utility or shading network node by type."""
 
 # Import future modules
 from __future__ import annotations
@@ -13,39 +13,49 @@ logger = logging.getLogger(__name__)
 def create_utility_node(
     node_type: str,
     name: Optional[str] = None,
+    connect_from: Optional[str] = None,
+    connect_to_attr: str = "input1",
 ) -> dict:
-    """Create any Maya utility or shading node by type.
+    """Create a Maya utility or shading node of the given type.
 
-    This is a generic factory action that complements :func:`create_material`
-    for cases where the Agent needs a specific utility node (e.g.
-    ``multiplyDivide``, ``reverse``, ``condition``, ``remapValue``,
-    ``blendColors``, ``samplerInfo``, etc.).
+    When *name* is provided, the node is first created without a name then
+    renamed via ``cmds.rename`` so the final node bears exactly the requested
+    name (consistent with how Round-3 tests mock the flow).
 
     Args:
-        node_type: Maya node type string (e.g. ``"multiplyDivide"``,
-            ``"condition"``, ``"reverse"``).
-        name: Optional name for the created node.  When omitted Maya
-            auto-generates one.
+        node_type: Maya node type (e.g. ``"multiplyDivide"``, ``"condition"``,
+            ``"reverse"``, ``"clamp"``, ``"blendColors"``, ``"remapValue"``).
+        name: Optional target node name.
+        connect_from: Optional ``"node.attr"`` to connect into the new node's input.
+        connect_to_attr: Attribute on the new node to receive the connection.
+            Default ``"input1"``.
 
     Returns:
-        ActionResultModel dict with ``context.node_name`` and
-        ``context.node_type``.
+        ActionResultModel dict with ``context.node_name`` and ``context.node_type``.
     """
     from dcc_mcp_core import error_result, success_result  # noqa: PLC0415
+
+    if not node_type:
+        return error_result("No node_type provided", "Provide a valid Maya node type string.").to_dict()
 
     try:
         import maya.cmds as cmds  # noqa: PLC0415
 
-        if not node_type or not node_type.strip():
-            return error_result("Invalid node_type", "node_type must not be empty").to_dict()
-
         node = cmds.shadingNode(node_type, asUtility=True)
 
-        if name and name.strip():
+        if name:
             node = cmds.rename(node, name)
 
+        if connect_from:
+            dest = "{}.{}".format(node, connect_to_attr)
+            cmds.connectAttr(connect_from, dest, force=True)
+
         return success_result(
-            "Created utility node '{}' of type '{}'".format(node, node_type),
+            "Created utility node: {}".format(node),
+            prompt=(
+                "Node '{}' created. Use set_material_attribute or connectAttr to wire it "
+                "into your shading network."
+            ).format(node),
             node_name=node,
             node_type=node_type,
         ).to_dict()
@@ -53,7 +63,7 @@ def create_utility_node(
         return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
     except Exception as exc:
         logger.exception("create_utility_node failed")
-        return error_result("Failed to create utility node of type '{}'".format(node_type), str(exc)).to_dict()
+        return error_result("Failed to create utility node", str(exc)).to_dict()
 
 
 def main(**kwargs):
@@ -62,6 +72,5 @@ def main(**kwargs):
 
 if __name__ == "__main__":
     import json
-
-    result = create_utility_node()
+    result = create_utility_node("multiplyDivide", name="myMult")
     print(json.dumps(result))
