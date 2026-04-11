@@ -1,0 +1,109 @@
+"""Export selected geometry to a versioned publish path (FBX or MA)."""
+
+# Import future modules
+from __future__ import annotations
+
+# Import built-in modules
+import logging
+import os
+import re
+from typing import List, Optional
+
+logger = logging.getLogger(__name__)
+
+
+def _next_version(publish_dir: str, asset_name: str, fmt: str) -> int:
+    """Scan existing publish files and return the next version number."""
+    pattern = re.compile(r"^{}_v(\d+)\.{}$".format(re.escape(asset_name), re.escape(fmt)))
+    max_ver = 0
+    if os.path.isdir(publish_dir):
+        for entry in os.listdir(publish_dir):
+            m = pattern.match(entry)
+            if m:
+                max_ver = max(max_ver, int(m.group(1)))
+    return max_ver + 1
+
+
+def publish_asset(
+    asset_name: str,
+    publish_dir: str,
+    format: str = "fbx",
+    frame_range: Optional[List[int]] = None,
+    version: Optional[int] = None,
+) -> dict:
+    """Publish the current selection as a versioned asset.
+
+    Args:
+        asset_name: Base name for the published file.
+        publish_dir: Directory to publish into.
+        format: ``"fbx"`` | ``"ma"``. Default ``"fbx"``.
+        frame_range: ``[start, end]`` for FBX animation export. Default: current frame only.
+        version: Explicit version number; if omitted, auto-increments.
+
+    Returns:
+        ActionResultModel dict with ``context.publish_path`` and ``context.version``.
+    """
+    from dcc_mcp_core import error_result, success_result  # noqa: PLC0415
+
+    if not asset_name:
+        return error_result("No asset_name provided", "Provide 'asset_name' parameter.").to_dict()
+    if not publish_dir:
+        return error_result("No publish_dir provided", "Provide 'publish_dir' parameter.").to_dict()
+
+    fmt = format.lower()
+
+    try:
+        import maya.cmds as cmds  # noqa: PLC0415
+        import maya.mel as mel  # noqa: PLC0415
+
+        selection = cmds.ls(selection=True)
+        if not selection:
+            return error_result("Nothing selected", "Select at least one object before publishing.").to_dict()
+
+        if not os.path.isdir(publish_dir):
+            os.makedirs(publish_dir)
+
+        ver = version if version is not None else _next_version(publish_dir, asset_name, fmt)
+        filename = "{}_v{:03d}.{}".format(asset_name, ver, fmt)
+        publish_path = os.path.join(publish_dir, filename).replace("\\", "/")
+
+        if fmt == "fbx":
+            mel.eval("FBXExportSmoothingGroups -v true")
+            if frame_range and len(frame_range) == 2:
+                mel.eval("FBXExportBakeAnimation -v true")
+                mel.eval("FBXExportBakeAnimationStart -v {}".format(int(frame_range[0])))
+                mel.eval("FBXExportBakeAnimationEnd -v {}".format(int(frame_range[1])))
+            mel.eval('FBXExport -f "{}" -s'.format(publish_path))
+
+        elif fmt == "ma":
+            cmds.file(
+                publish_path,
+                exportSelected=True,
+                type="mayaAscii",
+                force=True,
+            )
+        else:
+            return error_result("Unsupported format '{}'".format(fmt), "Use 'fbx' or 'ma'.").to_dict()
+
+        return success_result(
+            "Published {} v{:03d} to {}".format(asset_name, ver, publish_path),
+            prompt="Asset published. Tag it with tag_asset_metadata for pipeline tracking.",
+            publish_path=publish_path,
+            version=ver,
+            asset_name=asset_name,
+        ).to_dict()
+    except ImportError:
+        return error_result("Maya not available", "maya.cmds could not be imported").to_dict()
+    except Exception as exc:
+        logger.exception("publish_asset failed")
+        return error_result("Publish failed", str(exc)).to_dict()
+
+
+def main(**kwargs):
+    return publish_asset(**kwargs)
+
+
+if __name__ == "__main__":
+    import json
+    result = publish_asset("hero_character", "/path/to/publish", format="ma")
+    print(json.dumps(result))
