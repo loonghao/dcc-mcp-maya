@@ -5,33 +5,35 @@ from __future__ import annotations
 
 # Import built-in modules
 import logging
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
 
-def execute_mel(script: str) -> dict:
-    """Execute a MEL script inside Maya.
+def execute_mel(code: str) -> dict:
+    """Execute a MEL expression and return its string result.
 
     Args:
-        script: MEL code to execute.
+        code: MEL code to execute.
 
     Returns:
-        ActionResultModel dict with ``context.output`` from the script.
-
-    Example::
-
-        execute_mel("sphere; select -all;")
+        ActionResultModel dict with ``context.output`` (str) and ``context.script``.
     """
     from dcc_mcp_core import error_result, success_result  # noqa: PLC0415
+
+    if not code or not code.strip():
+        return error_result("No MEL code provided", "Provide 'code' with valid MEL.").to_dict()
 
     try:
         import maya.mel as mel  # noqa: PLC0415
 
-        result = mel.eval(script)
+        raw = mel.eval(code)
+        output = str(raw) if raw is not None else ""
         return success_result(
             "MEL executed successfully",
-            output=str(result) if result is not None else "",
-            script=script,
+            prompt="MEL script finished. Check 'output' for any return value.",
+            output=output,
+            script=code,
         ).to_dict()
     except ImportError:
         return error_result("Maya not available", "maya.mel could not be imported").to_dict()
@@ -46,6 +48,5 @@ def main(**kwargs):
 
 if __name__ == "__main__":
     import json
-
-    result = execute_mel()
+    result = execute_mel("polySphere -n mySphere;")
     print(json.dumps(result))
