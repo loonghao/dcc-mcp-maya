@@ -173,9 +173,7 @@ class TestServerLifecycle:
         server.register_builtin_actions()
         # Progressive loading: discover() finds skills but does NOT load them.
         # list_skills() returns all discovered skills regardless of status.
-        all_skills = {
-            s.name if hasattr(s, "name") else s["name"] for s in server._server.list_skills()
-        }
+        all_skills = {s.name if hasattr(s, "name") else s["name"] for s in server._server.list_skills()}
         # Key skills must be discoverable
         assert "maya-primitives" in all_skills
         assert "maya-scripting" in all_skills
