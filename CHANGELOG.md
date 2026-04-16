@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.8](https://github.com/loonghao/dcc-mcp-maya/compare/v0.2.7...v0.2.8) (2026-04-16)
+
+
+### Code Refactoring
+
+* use DccServerBase from dcc-mcp-core ([#54](https://github.com/loonghao/dcc-mcp-maya/issues/54)) ([b94c4cc](https://github.com/loonghao/dcc-mcp-maya/commit/b94c4cca7b63d73e9d63abc8197651677916b85b))
+
 ## [0.2.7](https://github.com/loonghao/dcc-mcp-maya/compare/v0.2.6...v0.2.7) (2026-04-15)
 
 
