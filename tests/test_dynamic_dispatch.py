@@ -180,7 +180,7 @@ class _RecordingDispatcher:
 @pytest.fixture()
 def server_with_dispatcher():
     dispatcher = _RecordingDispatcher()
-    server = MayaMcpServer(port=0, enable_gateway_failover=False)
+    server = MayaMcpServer(port=0, enable_gateway_failover=False, gateway_port=0)
     server.attach_dispatcher(dispatcher)
     server.register_builtin_actions(minimal=True)
     handle = server.start()
@@ -308,7 +308,7 @@ def test_load_skill_then_dynamic_call_uses_dispatcher(server_with_dispatcher):
 
 def test_dynamic_call_without_dispatcher_still_works():
     """mayapy / batch / test contexts have no dispatcher; inline path must work."""
-    server = MayaMcpServer(port=0, enable_gateway_failover=False)
+    server = MayaMcpServer(port=0, enable_gateway_failover=False, gateway_port=0)
     server.register_builtin_actions(minimal=True)
     handle = server.start()
     try:

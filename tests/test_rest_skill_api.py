@@ -57,8 +57,13 @@ from dcc_mcp_maya.server import MayaMcpServer  # noqa: E402
 
 @pytest.fixture(scope="module")
 def running_server():
-    """Start a Maya MCP server in minimal mode on an ephemeral port."""
-    server = MayaMcpServer(port=0, enable_gateway_failover=False)
+    """Start a Maya MCP server in minimal mode on an ephemeral port.
+
+    Gateway is fully disabled so ``publish_capability_snapshot`` takes the
+    no-op branch deterministically (CI may set ``DCC_MCP_GATEWAY_PORT`` and
+    a non-zero default would otherwise make the "no gateway" test flap).
+    """
+    server = MayaMcpServer(port=0, enable_gateway_failover=False, gateway_port=0)
     server.register_builtin_actions(minimal=True)
     handle = server.start()
     # Give the Rust listener a beat to fully accept before we probe it.
@@ -288,7 +293,7 @@ def test_capability_manifest_exposes_skill_actions_mcp_does_not():
     ``tool_slug`` can discover every action in one round-trip without
     forcing every skill to load.
     """
-    server = MayaMcpServer(port=0, enable_gateway_failover=False)
+    server = MayaMcpServer(port=0, enable_gateway_failover=False, gateway_port=0)
     server.register_builtin_actions(minimal=False)
     handle = server.start()
     try:
@@ -488,8 +493,14 @@ def test_publish_capability_snapshot_is_noop_without_gateway(running_server):
     network that is not listening (waste of heartbeat budget) and is part
     of the #165 contract — "Main-thread Maya operations execute through
     the in-process dispatcher" without gateway coupling required.
+
+    The fixture pins ``gateway_port=0`` so the short-circuit path is
+    deterministic regardless of the ``DCC_MCP_GATEWAY_PORT`` env var that
+    CI runners may set.
     """
     server, _ = running_server
+    # Sanity: confirm the fixture really disabled the gateway.
+    assert getattr(server._config, "gateway_port", 0) == 0
     assert server.publish_capability_snapshot(reason="test") is False
 
 
