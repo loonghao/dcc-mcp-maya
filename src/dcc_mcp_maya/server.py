@@ -322,9 +322,7 @@ class MayaMcpServer(DccServerBase):
             try:
                 register_capability_mcp_tool(self, builder=self._capability_builder)
             except Exception as exc:  # noqa: BLE001
-                logger.debug(
-                    "[%s] capability manifest MCP tool registration failed: %s", "maya", exc
-                )
+                logger.debug("[%s] capability manifest MCP tool registration failed: %s", "maya", exc)
 
         return self
 
