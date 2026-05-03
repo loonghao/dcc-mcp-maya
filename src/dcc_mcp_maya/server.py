@@ -260,9 +260,7 @@ class MayaMcpServer(DccServerBase):
         # ``MayaMcpServer.readiness_report`` for tests and orchestrators
         # that want an honest startup signal instead of the
         # always-green default the core currently ships.
-        self._readiness_timeout_secs: Optional[int] = (
-            _readiness.resolve_readiness_timeout_secs(readiness_timeout_secs)
-        )
+        self._readiness_timeout_secs: Optional[int] = _readiness.resolve_readiness_timeout_secs(readiness_timeout_secs)
         self._readiness: _readiness.ReadinessProbe = _readiness.install_readiness(
             self,
             timeout_secs=self._readiness_timeout_secs,
