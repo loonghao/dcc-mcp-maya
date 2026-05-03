@@ -37,6 +37,7 @@ from dcc_mcp_maya import (
     _env,
     _executor,
     _project_tools,
+    _readiness,
     _skill_loader,
     _transport,
     _version_probe,
@@ -107,6 +108,7 @@ class MayaMcpServer(DccServerBase):
         tool_exposure: Optional[str] = None,
         cursor_safe_tool_names: Optional[bool] = None,
         host_dispatcher: Optional[Any] = None,
+        readiness_timeout_secs: Optional[int] = None,
     ) -> None:
         super().__init__(
             dcc_name="maya",
@@ -250,6 +252,22 @@ class MayaMcpServer(DccServerBase):
         # or the underlying core call failed at registration time.
         self._project_tools: Optional[_project_tools.ProjectToolsIntegration] = None
 
+        # ── Runtime readiness probe (issue #184) ───────────────────────
+        # Three-state (process / dispatcher / dcc) probe.  Starts with
+        # ``dispatcher=False, dcc=False``; flips to all-green only after
+        # the in-process executor is wired **and** Maya's main thread
+        # has pumped at least one job.  Exposed via
+        # ``MayaMcpServer.readiness_report`` for tests and orchestrators
+        # that want an honest startup signal instead of the
+        # always-green default the core currently ships.
+        self._readiness_timeout_secs: Optional[int] = (
+            _readiness.resolve_readiness_timeout_secs(readiness_timeout_secs)
+        )
+        self._readiness: _readiness.ReadinessProbe = _readiness.install_readiness(
+            self,
+            timeout_secs=self._readiness_timeout_secs,
+        )
+
     # ── Lifecycle additions ────────────────────────────────────────────
 
     def attach_dispatcher(self, dispatcher: Any) -> None:
@@ -275,6 +293,26 @@ class MayaMcpServer(DccServerBase):
             self.register_inprocess_executor(MayaCallableDispatcher(dispatcher))
         else:
             self.register_inprocess_executor(dispatcher)
+
+        # ── Readiness (issue #184) ─────────────────────────────────────
+        # A late ``attach_dispatcher`` (e.g. plugin bootstrap wires the
+        # dispatcher after ``MayaMcpServer.__init__`` ran) must still
+        # flip ``dispatcher=true`` and schedule the dcc probe.  The
+        # initial ``install_readiness`` call in ``__init__`` is a
+        # no-op in that case because the dispatcher was ``None`` then.
+        #
+        # Guarded with ``getattr`` because ``__init__`` calls
+        # ``attach_dispatcher`` *before* ``self._readiness`` is
+        # constructed — the first call is a no-op here and the final
+        # ``install_readiness`` at the end of ``__init__`` performs
+        # the real wiring.
+        probe = getattr(self, "_readiness", None)
+        if probe is not None:
+            try:
+                probe.bound_server = None  # force re-bind
+                probe.bind(self)
+            except Exception as exc:  # noqa: BLE001
+                logger.debug("[%s] readiness re-bind failed: %s", self._dcc_name, exc)
 
     def stop(self) -> None:
         """Stop the HTTP server and drain any attached Maya dispatcher.
@@ -465,7 +503,7 @@ class MayaMcpServer(DccServerBase):
             logger.debug("[%s] unload_skill(%r) failed: %s", self._dcc_name, skill_name, exc)
             return False
 
-    # ── Gateway capability manifest + metadata (issues #163 / #165) ────
+    # ── Lifecycle: start() + gateway capability metadata ───────────────
 
     def start(self) -> Any:
         """Start the HTTP server.
@@ -548,6 +586,30 @@ class MayaMcpServer(DccServerBase):
                 meta.get("version"),
             )
         return bool(ok)
+
+    # ── Readiness (issue #184) ─────────────────────────────────────────
+
+    def readiness_report(self) -> dict:
+        """Return the current three-state readiness snapshot as a dict.
+
+        Keys: ``process`` / ``dispatcher`` / ``dcc`` (all booleans).  The
+        backend is considered ready only when all three are ``True``.
+        During Maya's boot window the expected sequence is::
+
+            {"process": True, "dispatcher": False, "dcc": False}
+            {"process": True, "dispatcher": True,  "dcc": False}  # after executor attached
+            {"process": True, "dispatcher": True,  "dcc": True}   # after first main-thread pump
+
+        See :mod:`dcc_mcp_maya._readiness` for the full contract.
+        """
+        return self._readiness.report().to_dict()
+
+    @property
+    def readiness(self) -> _readiness.ReadinessProbe:
+        """Expose the :class:`ReadinessProbe` for tests and orchestrators."""
+        return self._readiness
+
+    # ── Gateway capability manifest + metadata (issues #163 / #165) ────
 
     def build_capability_manifest(self, *, loaded_only: bool = False) -> dict:
         """Return the compact Maya capability manifest as a dict.
@@ -644,6 +706,7 @@ def start_server(
     dcc_window_title: Optional[str] = None,
     dcc_window_handle: Optional[int] = None,
     host_dispatcher: Optional[Any] = None,
+    readiness_timeout_secs: Optional[int] = None,
     **kwargs: Any,
 ) -> Any:
     """Start (or return the already-running) Maya MCP server.
@@ -682,6 +745,7 @@ def start_server(
                 dcc_window_title=dcc_window_title,
                 dcc_window_handle=dcc_window_handle,
                 host_dispatcher=host_dispatcher,
+                readiness_timeout_secs=readiness_timeout_secs,
                 **kwargs,
             )
             _instance_holder[0] = server
@@ -727,6 +791,7 @@ def start_server(
         dcc_window_title=dcc_window_title,
         dcc_window_handle=dcc_window_handle,
         host_dispatcher=host_dispatcher,
+        readiness_timeout_secs=readiness_timeout_secs,
         **kwargs,
     )
     _server_instance = _instance_holder[0]

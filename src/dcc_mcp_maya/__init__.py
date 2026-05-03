@@ -48,6 +48,14 @@ from dcc_mcp_maya._project_tools import (
 from dcc_mcp_maya._project_tools import (
     attach_to_server as attach_project_tools,
 )
+from dcc_mcp_maya._readiness import (
+    ENV_READINESS_TIMEOUT_SECS,
+    ReadinessProbe,
+    ReadinessReport,
+    StaticReadiness,
+    install_readiness,
+    resolve_readiness_timeout_secs,
+)
 from dcc_mcp_maya.api import (
     MissingParamError,
     batch_validate_nodes,
@@ -167,4 +175,11 @@ __all__ = [
     "VALID_TOOL_EXPOSURE_MODES",
     "resolve_tool_exposure",
     "resolve_cursor_safe_tool_names",
+    # Runtime readiness probe (issue #184)
+    "ENV_READINESS_TIMEOUT_SECS",
+    "ReadinessProbe",
+    "ReadinessReport",
+    "StaticReadiness",
+    "install_readiness",
+    "resolve_readiness_timeout_secs",
 ]

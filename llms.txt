@@ -112,6 +112,13 @@ Project-state persistence (issue #576 / core 0.14.21):
 * `dcc_mcp_maya._project_tools.attach_to_server(server)` — registers `project.save / project.load / project.resume / project.status` MCP tools that persist scene state to `<scene_dir>/.dcc-mcp/project.json`.  Auto-invoked by `register_builtin_actions()`; opt out with `DCC_MCP_MAYA_PROJECT_TOOLS=0`.
 * Public symbols: `ProjectToolsIntegration`, `MayaSceneResolver`, `attach_project_tools`, `ENV_PROJECT_TOOLS`.
 
+Runtime readiness probe (issue #184):
+
+* `server.readiness_report()` → `{"process": bool, "dispatcher": bool, "dcc": bool}` — honest three-state signal for `GET /v1/readyz` so orchestrators stop trusting the always-green default during Maya's boot window.  `process` starts `True`; `dispatcher` flips `True` after `register_inprocess_executor(...)`; `dcc` flips `True` after Maya's main thread pumps the first deferred no-op (synchronous on `MayaStandaloneDispatcher`).
+* Opt-in advisory timeout: `DCC_MCP_MAYA_READINESS_TIMEOUT_SECS=<positive int>` — consumed by orchestrators, never auto-fails the probe.
+* Public symbols: `ReadinessReport`, `StaticReadiness`, `ReadinessProbe`, `install_readiness`, `resolve_readiness_timeout_secs`, `ENV_READINESS_TIMEOUT_SECS`.
+
+
 ---
 
 ## Skill Authoring Helpers (api.py)
