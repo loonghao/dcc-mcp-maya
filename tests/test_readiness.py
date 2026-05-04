@@ -192,6 +192,32 @@ class TestReadinessBinderBind:
         assert call["affinity"] == "main"
         assert call["has_callback"] is True
 
+    def test_bind_with_post_tick_dispatcher_flips_dcc_optimistically(self) -> None:
+        """Core's ``BlockingDispatcher`` / ``QueueDispatcher`` use a post/tick
+        protocol — no ``submit_async_callable``, no per-job callback.  The
+        binder must recognise that shape and flip ``dcc`` immediately so
+        real-world plugin-driven servers don't get stuck at 503.
+        """
+
+        class _PostTickDispatcher:
+            """Minimal stand-in for core's ``BlockingDispatcher`` shape."""
+
+            def post(self, _callback: Any) -> None:
+                pass
+
+            def tick(self) -> None:
+                pass
+
+        server = _FakeServer(dispatcher=_PostTickDispatcher())
+        binder = ReadinessBinder()
+        bound = binder.bind(server)
+        assert bound is True
+        assert binder.report() == {
+            "process": True,
+            "dispatcher": True,
+            "dcc": True,
+        }
+
     def test_bind_is_idempotent(self) -> None:
         server = _FakeServer(dispatcher=MayaStandaloneDispatcher())
         binder = ReadinessBinder()

@@ -115,25 +115,34 @@ UI dispatchers).
 
 
 def _default_probe_scheduler(dispatcher: Any, on_done: Callable[[], None]) -> bool:
-    """Submit a no-op job on *dispatcher* and flip ``dcc`` in its callback.
+    """Schedule a dcc-ready probe on *dispatcher*.
 
-    We use :meth:`submit_async_callable` because it's non-blocking — the
-    caller returns immediately and the callback fires on the UI thread
-    once Maya pumps.  On :class:`MayaStandaloneDispatcher` the callback
-    fires synchronously on the calling thread, which mirrors the "dcc is
-    ready the moment we're in mayapy" contract.
+    Two dispatcher shapes are in play at runtime:
 
-    Every dispatcher shipped by this package
-    (:class:`MayaUiDispatcher` / :class:`MayaStandaloneDispatcher` /
-    :class:`MayaCallableDispatcher`) implements the full core 0.14.28
-    :class:`BaseDccCallableDispatcherFull` protocol, so no fallback
-    branches are needed.
+    * **Full callable protocol** (:class:`MayaUiDispatcher` /
+      :class:`MayaStandaloneDispatcher`): implements
+      :meth:`submit_async_callable` with an ``on_complete`` callback.
+      Submit a no-op job at ``affinity="main"`` and flip ``dcc`` from
+      the callback — guaranteeing the bit only flips after Maya's
+      main thread has actually pumped one job.
+    * **Post/tick protocol** (core's ``BlockingDispatcher`` /
+      ``QueueDispatcher`` attached via the plugin bootstrap): no
+      ``submit_async_callable`` hook and no per-job callback API, so
+      we trust the dispatcher to pump correctly and flip ``dcc``
+      immediately.  The alternative — leaving ``dcc`` red forever —
+      would make ``/v1/readyz`` return 503 for every real-world
+      plugin-driven server.
     """
+    submit_async = getattr(dispatcher, "submit_async_callable", None)
+    if submit_async is None:
+        # Post/tick-style dispatcher — flip optimistically.
+        on_done()
+        return True
 
     def _on_complete(_result: Any) -> None:  # noqa: ARG001 — signature contract
         on_done()
 
-    dispatcher.submit_async_callable(
+    submit_async(
         request_id=READINESS_PROBE_REQUEST_ID,
         task=lambda: None,
         affinity="main",
