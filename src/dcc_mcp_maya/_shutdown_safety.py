@@ -333,11 +333,11 @@ class ProcessSentinel:
             if sys.platform == "win32":
                 # ``os.O_TEMPORARY`` maps to FILE_FLAG_DELETE_ON_CLOSE —
                 # when the process dies the kernel drops the file for us.
-                flags |= getattr(os, "O_TEMPORARY", 0)
-                # ``O_NOINHERIT`` prevents child processes inheriting the
-                # handle, which would otherwise delay deletion until every
-                # child closes it too.
-                flags |= getattr(os, "O_NOINHERIT", 0)
+                # ``O_NOINHERIT`` prevents child processes inheriting
+                # the handle, which would otherwise delay deletion
+                # until every child closes it too.  Both flags are
+                # Windows-only and always present on CPython 3.7+ there.
+                flags |= os.O_TEMPORARY | os.O_NOINHERIT
             try:
                 self._fd = os.open(str(self.path), flags, mode)
             except OSError as exc:
