@@ -8,9 +8,10 @@ until Maya's main thread pumps, and the gateway's first auto-aggregation
 probe fails with *"not a DCC MCP HTTP endpoint"* because the fresh HTTP
 listener has not answered its first request yet.
 
-Core 0.14.28 ships the three-state probe in Rust and exposes the Python
-binding (``dcc_mcp_core.ReadinessProbe`` + ``McpHttpServer.set_readiness_probe``).
-This module owns the **Maya-specific** half of the contract:
+Core 0.14.28 first exposed the three-state probe in Rust and its Python
+binding (``dcc_mcp_core.ReadinessProbe`` + ``McpHttpServer.set_readiness_probe``);
+``pyproject.toml`` now pins the floor at 0.15.0, the SOLID crate-split
+release.  This module owns the **Maya-specific** half of the contract:
 
 * flip ``dispatcher = true`` the moment the in-process executor is wired;
 * schedule a cheap no-op job on the UI dispatcher and flip ``dcc = true``
