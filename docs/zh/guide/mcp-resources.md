@@ -20,6 +20,47 @@ Issue [#187](https://github.com/loonghao/dcc-mcp-maya/issues/187) 把
 
 [resource-handle]: https://github.com/loonghao/dcc-mcp-core/blob/main/llms.txt
 
+## 快速验证
+
+启动 `dcc_mcp_maya.start_server()` 后，把 MCP 客户端
+（Claude Desktop、Cursor 等）指向打印出来的 URL，资源表面会自动出现：
+
+```jsonc
+// resources/list
+{
+  "resources": [
+    { "uri": "scene://current", "name": "Current Scene", "mimeType": "application/json" },
+    { "uri": "capture://current_window", ... },
+    { "uri": "audit://recent", ... },
+    { "uri": "maya-cmds://", "name": "Python-provided resource (maya-cmds)" },
+    { "uri": "maya-api://", "name": "Python-provided resource (maya-api)" },
+    { "uri": "maya-project://", "name": "Python-provided resource (maya-project)" }
+  ]
+}
+```
+
+```jsonc
+// resources/read scene://current  （场景已打开）
+{
+  "contents": [{
+    "uri": "scene://current",
+    "mimeType": "application/json",
+    "text": "{\"available\":true,\"dcc\":\"maya\",\"scene\":\"/projects/foo/scenes/sh_010.ma\",...}"
+  }]
+}
+```
+
+```jsonc
+// resources/read maya-cmds://help/polySphere
+{
+  "contents": [{
+    "uri": "maya-cmds://help/polySphere",
+    "mimeType": "text/plain",
+    "text": "polySphere is undoable, queryable, and editable.\n\nFlags:\n -axis  -ax ..."
+  }]
+}
+```
+
 ## 节流策略：`scene://current` 不会变贵
 
 Maya 的 `DagObjectCreated` **每个节点触发一次**。导入 1000 个节点的
@@ -63,12 +104,49 @@ from dcc_mcp_maya import (
 )
 ```
 
-`install_resources(server)` 在 `MayaMcpServer.register_builtin_actions`
-里随 `register_project_tools` 自动调用。默认的快照源是
-`MayaContextSnapshotProvider.collect`，与 `/v1/context` REST 端点
-共用同一份场景状态。
+### `install_resources(server, *, snapshot_provider=None, install_scene_events=True, throttle_secs=0.5)`
 
-## 现状：prompts（来自 examples / workflows）
+`MayaMcpServer.register_builtin_actions()` 在 `register_project_tools`
+之后自动调用。默认快照源是 `MayaContextSnapshotProvider.collect`，
+与 `/v1/context` REST 端点共用同一份场景状态，避免双源不一致。
+
+### `MayaResourceBinder`
+
+组合根。所有对 `server._server.resources()` 的调用集中在这一类里，
+便于将来 schema 迁移只改一份代码。技能脚本与插件代码 **不应** 直接
+访问 `ResourceHandle`；如果需要主动推送，使用
+`MayaMcpServer._resources` 上暴露的方法：
+
+```python
+# 主动刷新（例如 scriptJob 没有覆盖到的脚本编辑）
+server._resources.publish_scene()                      # 用默认 provider
+server._resources.publish_scene({"explicit": "value"}) # 跳过 provider
+```
+
+## 编写自定义 producer
+
+技能要暴露自定义 URI scheme 时，写一个 producer 并在启动钩子里注册：
+
+```python
+def my_camera_producer(uri: str) -> dict:
+    """maya-camera://<camera_name> → 摄像机的 JSON 描述。"""
+    name = uri.removeprefix("maya-camera://")
+    import maya.cmds as cmds
+    return {
+        "mimeType": "application/json",
+        "text": json.dumps({
+            "focal_length": cmds.getAttr(f"{name}.focalLength"),
+            "translate":    cmds.getAttr(f"{name}.translate")[0],
+        }),
+    }
+
+# MayaMcpServer.register_builtin_actions 之后注册一次：
+server._resources.handle.register_producer(
+    "maya-camera://", my_camera_producer
+)
+```
+
+## Prompts（next-tools / examples）现状
 
 core 0.15.0 已声明 `prompts: {listChanged: true}` 能力，
 `prompts/list` 返回空数组。PR #373 实现了从 SKILL.md `examples` /
