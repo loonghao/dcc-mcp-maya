@@ -350,10 +350,9 @@ class TestMayaUiDispatcher:
             BaseDccCallableDispatcher,
         )
 
-        try:
-            assert isinstance(d, BaseDccCallableDispatcher)
-        except TypeError:
-            pytest.skip("isinstance(Protocol) requires @runtime_checkable on this Python")
+        if sys.version_info < (3, 8):
+            pytest.skip("Python 3.7 Protocol runtime checks differ from typing_extensions")
+        assert isinstance(d, BaseDccCallableDispatcher)
 
 
 # ── MayaStandaloneDispatcher tests ───────────────────────────────────────────
