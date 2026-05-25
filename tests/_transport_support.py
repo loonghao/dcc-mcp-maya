@@ -126,12 +126,12 @@ def wait_for_sidecar_registry_row(
 ) -> Dict[str, Any]:
     services_path = registry_dir / "services.json"
     deadline = time.monotonic() + timeout
-    last_err = None
+    last_err: Optional[Exception] = None
     while time.monotonic() < deadline:
         if services_path.is_file():
             try:
                 payload = json.loads(services_path.read_text(encoding="utf-8"))
-            except json.JSONDecodeError as exc:
+            except (json.JSONDecodeError, OSError) as exc:
                 last_err = exc
             else:
                 for entry in _iter_registry_entries(payload):
@@ -150,9 +150,18 @@ def wait_for_sidecar_registry_row(
             services_path,
             host_rpc_uri,
             last_err,
-            services_path.read_text(encoding="utf-8") if services_path.is_file() else "<missing>",
+            _maybe_read_text(services_path),
         )
     )
+
+
+def _maybe_read_text(path: Path) -> str:
+    if not path.is_file():
+        return "<missing>"
+    try:
+        return path.read_text(encoding="utf-8")
+    except OSError as exc:
+        return "<unreadable: {!r}>".format(exc)
 
 
 def wait_for_tcp_url(url: str, timeout: float = 8.0) -> str:
