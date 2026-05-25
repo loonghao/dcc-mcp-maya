@@ -123,6 +123,7 @@ def wait_for_sidecar_registry_row(
     timeout: float = 8.0,
     *,
     host_rpc_uri: Optional[str] = None,
+    require_dialable_port: bool = True,
 ) -> Dict[str, Any]:
     services_path = registry_dir / "services.json"
     deadline = time.monotonic() + timeout
@@ -134,13 +135,13 @@ def wait_for_sidecar_registry_row(
             except (json.JSONDecodeError, OSError) as exc:
                 last_err = exc
             else:
-                for entry in _iter_registry_entries(payload):
+                for entry in iter_registry_entries(payload):
                     metadata = entry.get("metadata") or {}
                     if metadata.get("dcc_mcp_role") != "per-dcc-sidecar":
                         continue
                     if host_rpc_uri is not None and metadata.get("host_rpc_uri") != host_rpc_uri:
                         continue
-                    if not _entry_has_dialable_mcp_port(entry):
+                    if require_dialable_port and not _entry_has_dialable_mcp_port(entry):
                         continue
                     return entry
         time.sleep(0.05)
@@ -226,7 +227,7 @@ def _dialable_loopback_mcp_url(url: str) -> str:
     return urllib.parse.urlunsplit((parsed.scheme or "http", netloc, path, parsed.query, parsed.fragment))
 
 
-def _iter_registry_entries(payload: object) -> Iterator[Dict[str, Any]]:
+def iter_registry_entries(payload: object) -> Iterator[Dict[str, Any]]:
     if isinstance(payload, list):
         for item in payload:
             if isinstance(item, dict):
@@ -241,10 +242,10 @@ def _iter_registry_entries(payload: object) -> Iterator[Dict[str, Any]]:
             for item in services.values():
                 if isinstance(item, dict):
                     yield item
-        else:
-            for value in payload.values():
-                if isinstance(value, dict) and "dcc_type" in value:
-                    yield value
+    else:
+        for value in payload.values():
+            if isinstance(value, dict) and "dcc_type" in value:
+                yield value
 
 
 class ParentSurrogate:
