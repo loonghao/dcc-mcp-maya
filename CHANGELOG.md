@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.4](https://github.com/dcc-mcp/dcc-mcp-maya/compare/v0.4.3...v0.4.4) (2026-06-06)
+
+
+### Bug Fixes
+
+* **ci:** isolate workflow_dispatch from push concurrency in release workflow ([#338](https://github.com/dcc-mcp/dcc-mcp-maya/issues/338)) ([40ab983](https://github.com/dcc-mcp/dcc-mcp-maya/commit/40ab983ed1bfd928e940a6eb3591908b7115cb53))
+
 ## [0.4.3](https://github.com/dcc-mcp/dcc-mcp-maya/compare/v0.4.2...v0.4.3) (2026-06-05)
 
 
